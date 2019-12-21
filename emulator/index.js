@@ -29,8 +29,8 @@ document.getElementById('play').addEventListener('click', () => {
 });
 
 document.getElementById('step').addEventListener('click', () => {
-  state.step(currentState);
-  dbgr.render(currentState);
+  state.step(currentState)
+       .then(() => dbgr.render(currentState));
 });
 
 document.getElementById('show_dbg').addEventListener('click', () => {
@@ -68,13 +68,16 @@ function startProgram(program) {
 
   console.info(`Starting program...`);
 
-  if ( playing ) requestAnimationFrame(run);
+  if ( playing ) run();
 }
 
 function run() {
-  state.step(currentState)
-  .then(() => {
-    dbgr.render(currentState);
-    if ( playing ) requestAnimationFrame(run);
-  });
+  if ( playing )
+    setTimeout(() => {
+      state.tenSteps(currentState)
+      .then(() => {
+        dbgr.render(currentState);
+        run();
+      });
+    }, 17);
 }
