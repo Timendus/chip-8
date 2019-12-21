@@ -66,15 +66,16 @@ window.addEventListener('keyup', e => {
 });
 
 document.querySelectorAll('.keyboard button').forEach(b => {
-  b.addEventListener('mousedown', e => {
-    const index = e.target.id.substr(3);
-    kbdState[index] = true;
-  });
+  b.addEventListener('mousedown',  e => key(e.target.id, true));
+  b.addEventListener('touchstart', e => key(e.target.id, true));
 });
 
 document.querySelectorAll('.keyboard button').forEach(b => {
-  b.addEventListener('mouseup', e => {
-    const index = e.target.id.substr(3);
-    kbdState[index] = false;
-  });
+  b.addEventListener('mouseup',   e => key(e.target.id, false));
+  b.addEventListener('touchstop', e => key(e.target.id, false));
 });
+
+function key(id, state) {
+  const index = id.substr(3);
+  kbdState[index] = state;
+}
