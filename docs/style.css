@@ -1,0 +1,84 @@
+.device {
+  width: 256px;
+  height: 350px;
+  padding: 30px;
+  background-color: #333;
+  border-radius: 30px;
+  margin: 0 auto;
+}
+
+canvas {
+  width: 256px;
+  height: 128px;
+  background-color: #777;
+  border-radius: 5px;
+
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.keyboard {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.keyboard button {
+  margin: 5px 2px;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #777;
+  background-color: #CCC;
+  border-radius: 5px;
+}
+
+.keyboard button.active, .keyboard button:active {
+  background-color: #999;
+  color: #EEE;
+}
+
+.controls {
+  width: 256px;
+  margin: 0 auto;
+  padding: 2em;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+}
+
+input[type='file'] {
+  width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.controls label, .controls button {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  width: 100px;
+  height: 40px;
+  margin: 2px;
+  padding: 10px;
+  border: 2px solid #777;
+  background-color: #CCC;
+  border-radius: 5px;
+  font: 12px Tahoma;
+  white-space: nowrap;
+}
+
+.controls button.active {
+  background-color: #999;
+  color: #EEE;
+}
+
+#debugger {
+  margin: 2em;
+  overflow: hidden;
+  word-wrap: break-word;
+  max-width: 100vw;
+  white-space: pre-wrap;
+}

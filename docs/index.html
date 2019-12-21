@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Chip-8</title>
+    <link href="style.css" rel="stylesheet"/>
+    <script type="text/javascript" src="index.js" defer></script>
+  </head>
+
+  <body>
+    <section class="device">
+      <canvas id="display"></canvas>
+
+      <section class="keyboard">
+        <button id="Btn1">1</button>  <button id="Btn2">2</button> <button id="Btn3">3</button>  <button id="Btn12">C</button><br/>
+        <button id="Btn4">4</button>  <button id="Btn5">5</button> <button id="Btn6">6</button>  <button id="Btn13">D</button><br/>
+        <button id="Btn7">7</button>  <button id="Btn8">8</button> <button id="Btn9">9</button>  <button id="Btn14">E</button><br/>
+        <button id="Btn10">A</button> <button id="Btn0">0</button> <button id="Btn11">B</button> <button id="Btn15">F</button>
+      </section>
+    </section>
+
+    <section class="controls">
+      <label>
+        <input type="file" id="upload"></input>
+        Upload file
+      </label>
+      <button id="play">Pause</button>
+      <button id="step" disabled>Step</button>
+      <button id="show_dbg">Debugger</button>
+      <button id="show_opc">Instructions</button>
+    </section>
+
+    <kbd id="debugger"></kbd>
+  </body>
+
+</html>
