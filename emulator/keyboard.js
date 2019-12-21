@@ -46,7 +46,8 @@ const keyMap = {
   'ArrowUp':    2,
   'ArrowDown':  8,
   'ArrowLeft':  4,
-  'ArrowRight': 6
+  'ArrowRight': 6,
+  ' ':          5
 }
 
 window.addEventListener('keydown', e => {

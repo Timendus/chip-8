@@ -36,6 +36,7 @@ canvas {
   border: 2px solid #777;
   background-color: #CCC;
   border-radius: 5px;
+  user-select: none;
 }
 
 .keyboard button.active, .keyboard button:active {
