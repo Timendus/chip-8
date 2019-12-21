@@ -2,8 +2,9 @@
 
 Just something I threw together in 24 hours because... why not :)
 
-You can find some Chip-8 programs [here](https://github.com/dmatlack/chip8) and
-everywhere on the internet.
+See it in action at https://timendus.github.io/chip-8/. You can find some
+Chip-8 programs [here](https://github.com/dmatlack/chip8) and everywhere else on
+the internet.
 
 Note that this thing probably still has a few bugs. Not everything runs
 perfectly. Most of the programs that just draw a picture to the screen run just

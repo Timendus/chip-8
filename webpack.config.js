@@ -12,7 +12,6 @@ module.exports = {
 		filename: '[name].js'
 	},
 
-	watch: true,
   watchOptions: {
     ignored: [
       '/node_modules/'

@@ -2,7 +2,8 @@
   "name": "chip-8",
   "description": "A simple Chip-8 emulator",
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --watch",
+    "build": "webpack"
   },
   "devDependencies": {
     "nodemon": "^1.19.3",
