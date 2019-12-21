@@ -12,7 +12,7 @@ body {
 
 .device {
   width: 256px;
-  height: 350px;
+  height: 410px;
   padding: 30px;
   background-color: #333;
   border-radius: 30px;
@@ -38,8 +38,8 @@ canvas {
 
 .keyboard button {
   margin: 5px 2px;
-  width: 40px;
-  height: 40px;
+  width: 55px;
+  height: 55px;
   border: 2px solid #777;
   background-color: #CCC;
   border-radius: 5px;
