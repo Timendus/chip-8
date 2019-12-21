@@ -7,7 +7,9 @@ const sound  = require('./sound');
 const disasm = require('./disassembler');
 
 let currentState;
+let currentProgram;
 let playing = true;
+
 const debugging = {
   debugger: false,
   opcodes:  false
@@ -33,6 +35,10 @@ document.getElementById('step').addEventListener('click', () => {
        .then(() => dbgr.render(currentState));
 });
 
+document.getElementById('reset').addEventListener('click', () => {
+  startProgram(currentProgram);
+});
+
 document.getElementById('show_dbg').addEventListener('click', () => {
   debugging.debugger = !debugging.debugger;
   if ( currentState )
@@ -52,6 +58,7 @@ document.getElementById('show_opc').addEventListener('click', () => {
 // Load and run program
 
 function startProgram(program) {
+  currentProgram = program;
   currentState = state.new();
   currentState.debugging = debugging;
   font.load(currentState);
