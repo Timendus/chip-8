@@ -14,7 +14,7 @@ module.exports = {
       return 'RETURN';
 
     state.sp += 2;
-    state.pc = state.ram[state.sp - 0] + state.ram[state.sp - 1] * 0x100;
+    state.pc = state.ram[state.sp - 0] * 0x100 + state.ram[state.sp - 1];
     return `RETURN ${s.word2str(state.pc)}`;
   },
 
@@ -26,8 +26,8 @@ module.exports = {
   },
 
   '2...': ({state, nnn}) => {
-    state.ram[state.sp - 0] =  state.pc & 0x00ff;
-    state.ram[state.sp - 1] = (state.pc & 0xff00) / 0x100;
+    state.ram[state.sp - 0] = (state.pc & 0xff00) / 0x100;
+    state.ram[state.sp - 1] =  state.pc & 0x00ff;
     state.sp -= 2;
     state.pc = nnn - 2; // Step back one instruction because we step ahead later
     return `CALL ${s.word2str(nnn)}`;
