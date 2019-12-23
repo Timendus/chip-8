@@ -18,6 +18,7 @@ const debugging = {
 // Hook up controls under the "device"
 
 document.getElementById('upload').addEventListener('change', e => {
+  if ( e.target.files.length == 0 ) return;
   const reader = new FileReader();
   reader.addEventListener('load', e => startProgram(new Uint8Array(reader.result)));
   reader.readAsArrayBuffer(e.target.files[0]);
