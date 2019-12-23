@@ -166,7 +166,7 @@ module.exports = {
     state.sd = true;
     state.v[0xF] = erases ? 1 : 0;
 
-    return `drw ${xPos}, ${yPos}, ${n} (with ${s.word2str(state.i)} in i)`;
+    return `drw v${x}, v${y}, ${n} (with ${s.word2str(state.i)} in i)`;
   },
 
   'E.9E': ({state, x}) => {
