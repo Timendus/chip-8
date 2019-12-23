@@ -5,7 +5,7 @@ free Saturday :)
 
 See it in action at https://timendus.github.io/chip-8/. You can find some
 CHIP-8 programs [here](https://github.com/dmatlack/chip8) and everywhere else on
-the internet. Just download the binaries and upload them to the emulator.
+the internet. Just download the binaries and load them to the emulator.
 
 Note that there are no guarantees that this thing is bug-free. In fact, I found
 a couple of side effects to opcodes being documented differently by different
