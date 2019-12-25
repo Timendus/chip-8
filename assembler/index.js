@@ -62,11 +62,15 @@ module.exports = (source) => {
   return Uint8Array.from(bytes);
 };
 
+// Parse regexp matches to actual values
+// (first item is the whole matched string, not interested)
 function parseParams(matches, labels, line) {
   return matches.splice(1)
                 .map(n => inputValue(labels, n, line));
 }
 
+// Take any user input value (label or value) and try to make an array of bytes
+// from it, or give sane errors.
 function inputValue(labels, value, line) {
   // Can't handle this case at all
   if ( value === undefined ) return value;
@@ -100,6 +104,7 @@ function inputValue(labels, value, line) {
   return results;
 }
 
+// Take any input and try to make an array of bytes from it
 function any2bytes(any) {
   if ( any.match(e.hex) ) return [parseInt(any.substr(1), 16)];
   if ( any.match(e.bin) ) return [parseInt(any.substr(1), 2)];
