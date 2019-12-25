@@ -1,0 +1,6 @@
+{
+  "name": "chip-compiler",
+  "dependencies": {
+    "yargs": "^15.0.2"
+  }
+}
