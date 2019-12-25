@@ -3,7 +3,7 @@ const e = require('./expressions');
 module.exports = [
   {
     instruction: `.org ${e.value}$`,
-    place:       (old, [, addr]) => 1 * addr
+    place:       (old, [addr]) => addr
   },
   {
     type:        'label',

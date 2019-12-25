@@ -37,7 +37,7 @@ module.exports = (source) => {
   model.forEach(m => {
     m.address = lastAddress;
     if ( m.place )
-      lastAddress = m.place(lastAddress, m.matches);
+      lastAddress = m.place(lastAddress, parseParams(m.matches, {}, m.line));
     else if ( m.size )
       lastAddress += m.size;
   })
@@ -49,15 +49,9 @@ module.exports = (source) => {
   );
   labels['$errors'] = [];
 
-  // Parse instruction parameters (labels, different number formats, etc)
-  model.forEach(m => {
-    m.matches = m.matches.splice(1)
-                         .map(n => inputValue(labels, n, m.line));
-  });
-
   // Assemble model into bytes
   const bytes = model.filter(m => m.assemble)
-                     .map(m => m.assemble(m.matches))
+                     .map(m => m.assemble(parseParams(m.matches, labels, m.line)))
                      .flat();
 
   // We can't compile what we don't understand
@@ -67,6 +61,11 @@ module.exports = (source) => {
 
   return Uint8Array.from(bytes);
 };
+
+function parseParams(matches, labels, line) {
+  return matches.splice(1)
+                .map(n => inputValue(labels, n, line));
+}
 
 function inputValue(labels, value, line) {
   // Can't handle this case at all

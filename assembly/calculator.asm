@@ -1,7 +1,7 @@
 ; Test program; let's see if we can assemble this
 ; Also: testing comments.
 
-.org 512
+.org $200
 
   cls
   ld v0, 20
