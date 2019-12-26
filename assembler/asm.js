@@ -5,6 +5,7 @@
 const compiler = require('./index');
 const argv     = require('yargs').argv;
 const fs       = require('fs');
+const s        = require('./../emulator/binary_strings');
 
 if ( !argv.file ) {
   return console.error('\nYou need to specify a file to compile.\n\n./asm.js --file myprogram.asm --output binary.ch8');
@@ -14,16 +15,20 @@ let file;
 try {
   file = fs.readFileSync(argv.file, { encoding: 'utf8' });
 } catch(e) {
-  return console.error('\nCould not read your specified file :/\n', e.message);
+  return console.error('\nCould not read that file 😕\n', e.message);
 }
 
 try {
-  file = Buffer.from(compiler(file));
+  file = compiler(file);
 } catch(e) {
   return console.error(`${e}`);
 }
 
-if ( !argv.output )
-  console.log(file);
-else
-  fs.writeFileSync(argv.output, file);
+if ( argv.output )
+  return fs.writeFileSync(argv.output, Buffer.from(file));
+
+const output = [];
+for ( let i = 0; i < file.length; i += 2 ) {
+  output.push(s.byte2str(file[i]) + s.byte2str(file[i+1]));
+}
+console.log(output.join(' '));
