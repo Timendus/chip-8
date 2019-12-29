@@ -2,15 +2,16 @@ const e = require('./expressions');
 
 module.exports = [
   {
-    instruction: `.org ${e.value}$`,
-    place:       (old, [addr]) => addr
+    instruction: `.org ${e.val}$`,
+    getAddress:  (lastAddress, [addr]) => addr
   },
   {
     type:        'label',
-    instruction: `^${e.label}:$`
+    instruction: `^${e.lab}:$`
   },
   {
-    instruction: `\.db (${e.values})$`,
-    assemble:    ([bytes]) => bytes
+    instruction: `\.db ${e.vals}$`,
+    assemble:    bytes => bytes,
+    getAddress:  (lastAddress, bytes) => 1 * lastAddress + bytes.length
   }
 ]

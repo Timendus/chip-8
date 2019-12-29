@@ -1,3 +1,8 @@
+// Opcodes as documented at:
+//   * https://en.wikipedia.org/wiki/CHIP-8
+//   * http://mattmik.com/files/chip8/mastering/chip8.html
+//   * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
+
 const e = require('./expressions');
 
 module.exports = [
@@ -32,7 +37,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `1${e.nnn}`,
-    instruction: `jp (${e.value}|${e.label})$`,
+    instruction: `jp ${e.loc}$`,
     assemble:    ([nnn]) => [0x10 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
     disassemble: ([nnn]) => `jp ${nnn}`,
 
@@ -45,7 +50,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `2${e.nnn}`,
-    instruction: `call (${e.value}|${e.label})$`,
+    instruction: `call ${e.loc}$`,
     assemble:    ([nnn]) => [0x20 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
     disassemble: ([nnn]) => `call ${nnn}`,
 
@@ -62,7 +67,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `6${e.x}${e.nn}`,
-    instruction: `ld ${e.register},${e.value}$`,
+    instruction: `ld ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x60 | x & 0xF, nn & 0xFF],
     disassemble: ([x, nn]) => `ld v${x}, ${nn}`,
 
@@ -74,7 +79,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `7${e.x}${e.nn}`,
-    instruction: `add ${e.register},${e.value}$`,
+    instruction: `add ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x70 | x & 0xF, nn & 0xFF],
     disassemble: ([x, nn]) => `add v${x}, ${nn}`,
 
@@ -86,7 +91,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}0`,
-    instruction: `ld ${e.register},${e.register}$`,
+    instruction: `ld ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10],
     disassemble: ([x, y]) => `ld v${x}, v${y}`,
 
@@ -98,7 +103,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}1`,
-    instruction: `or ${e.register},${e.register}$`,
+    instruction: `or ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x1],
     disassemble: ([x, y]) => `or v${x}, v${y}`,
 
@@ -110,7 +115,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}2`,
-    instruction: `and ${e.register},${e.register}$`,
+    instruction: `and ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x2],
     disassemble: ([x, y]) => `and v${x}, v${y}`,
 
@@ -122,7 +127,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}3`,
-    instruction: `xor ${e.register},${e.register}$`,
+    instruction: `xor ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x3],
     disassemble: ([x, y]) => `xor v${x}, v${y}`,
 
@@ -134,7 +139,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}4`,
-    instruction: `add ${e.register},${e.register}$`,
+    instruction: `add ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x4],
     disassemble: ([x, y]) => `add v${x}, v${y}`,
 
@@ -149,7 +154,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.x}5`,
-    instruction: `sub ${e.register},${e.register}$`,
+    instruction: `sub ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x5],
     disassemble: ([x, y]) => `sub v${x}, v${y}`,
 
@@ -164,7 +169,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `A${e.nnn}`,
-    instruction: `ld i,\\s?(${e.value}|${e.label})$`,
+    instruction: `ld i,${e.loc}$`,
     assemble:    ([nnn]) => [0xA0 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
     disassemble: ([nnn]) => `ld i, ${nnn}`,
 
@@ -176,7 +181,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `D${e.x}${e.y}${e.n}`,
-    instruction: `drw ${e.register},${e.register},${e.value}$`,
+    instruction: `drw ${e.reg},${e.reg},${e.val}$`,
     assemble:    ([x, y, n]) => [0xD0 | x & 0xF, (y & 0xF) * 0x10 | n & 0xF],
     disassemble: ([x, y, n]) => `drw v${x}, v${y}, ${nn}`,
 
@@ -207,7 +212,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}0A`,
-    instruction: `getkey ${e.register}$`,
+    instruction: `getkey ${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x0A],
     disassemble: ([x]) => `getkey v${x}`,
 
@@ -223,7 +228,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}1E`,
-    instruction: `add i,${e.register}$`,
+    instruction: `add i,${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x1E],
     disassemble: ([x]) => `add i, v${x}`,
 
@@ -238,7 +243,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}29`,
-    instruction: `getfont ${e.register}$`,
+    instruction: `getfont ${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x29],
     disassemble: ([x]) => `getfont v${x}`,
 
@@ -252,7 +257,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}55`,
-    instruction: `ld \\(i\\),${e.register}$`,
+    instruction: `ld \\(i\\),${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x55],
     disassemble: ([x]) => `ld (i), v${x}`,
 
@@ -267,7 +272,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}65`,
-    instruction: `ld ${e.register},\\s?\\(i\\)$`,
+    instruction: `ld ${e.reg},\\s?\\(i\\)$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x65],
     disassemble: ([x]) => `ld v${x}, (i)`,
 

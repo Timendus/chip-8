@@ -5,11 +5,16 @@ const directives = require('./directives');
 const e          = require('./expressions');
 const s          = require('../emulator/binary_strings');
 
-module.exports = (source) => {
+module.exports = (source, options) => {
+
+  // Override default options
+  options = Object.assign({
+    outputModel: false,
+    outputLabels: false
+  }, options);
 
   const lines  = source.split('\n');
   const model  = [];
-  const errors = [];
 
   lines.forEach((line, linenum) => {
     line = line.split(';')[0];  // Strip out comments
@@ -21,94 +26,106 @@ module.exports = (source) => {
     else
       interpretation = directives.find(d => line.trim().match(d.instruction));
 
-    if ( !interpretation ) {
-      errors.push(`\nError on line ${linenum+1}:\n\tI don't know how to interpret '${line.trim()}'`);
-      return;
-    }
+    // If we can't find an interpretation, that's an error
+    if ( !interpretation )
+      return model.push({
+        line:   linenum + 1,
+        errors: [`I don't know how to interpret '${line.trim()}'`]
+      });
 
+    // Make a copy of the opcode or directive and add specific fields
     const clone = { ...interpretation };
-    clone.matches = line.trim().match(clone.instruction);
-    clone.line = linenum + 1;
-    model.push(clone); // Done!
+    clone.matches    = line.trim().match(clone.instruction);
+    clone.line       = linenum + 1;
+    clone.errors     = [];
+    clone.parameters = getParams(clone);
+
+    // Done! Next!
+    model.push(clone);
   });
 
   // Give every entry in the model its address
   let lastAddress = 0;
   model.forEach(m => {
     m.address = lastAddress;
-    if ( m.place )
-      lastAddress = m.place(lastAddress, parseParams(m.matches, {}, m.line));
-    else if ( m.size )
+    if ( m.getAddress )
+      lastAddress = m.getAddress(lastAddress, m.parameters);
+    if ( m.size )
       lastAddress += m.size;
-  })
+  });
 
-  // Collect labels
-  const labels = Object.fromEntries(
+  // Collect all labels
+  labels = Object.fromEntries(
     model.filter(m => m.type === 'label')
-         .map(m => [m.matches[1], m.address])
+         .map(m => [m.parameters[0], m.address])
   );
-  labels['$errors'] = [];
+
+  if ( options.outputModel ) console.log(model);
+  if ( options.outputLabels ) console.log(labels);
+
+  // Fill in labels
+  model.filter(m => m.parameters)
+       .forEach(m => {
+         m.parameters = m.parameters.map(p => {
+           if ( typeof p === 'number' ) return p;
+           if ( labels[p] ) return labels[p];
+           m.errors.push(`Could not find label '${p}'`);
+           return null;
+         });
+       });
 
   // Assemble model into bytes
   const bytes = model.filter(m => m.assemble)
-                     .map(m => m.assemble(parseParams(m.matches, labels, m.line)))
+                     .map(m => m.assemble(m.parameters))
                      .flat();
 
-  // We can't compile what we don't understand
-  if ( errors.length > 0 || labels['$errors'].length > 0 )
-    throw "\nFound these errors, can't assemble. Sorry 😕\n" +
-          errors.join('') + labels['$errors'].join('');
+  // Output all errors we encountered
+  const errors = model.filter(m => m.errors.length > 0)
+                      .map(m => `\nError(s) on line ${m.line}:\n` +
+                                    m.errors.map(e => `\t${e}\n`));
+  if ( errors.length > 0 )
+    throw "\nFound these errors, can't assemble. Sorry 😕\n" + errors.join('');
 
   return Uint8Array.from(bytes);
 };
 
-// Parse regexp matches to actual values
-// (first item is the whole matched string, not interested)
-function parseParams(matches, labels, line) {
-  return matches.splice(1)
-                .map(n => inputValue(labels, n, line));
-}
+function getParams(i) {
+  if ( !i.matches ) return [];
 
-// Take any user input value (label or value) and try to make an array of bytes
-// from it, or give sane errors.
-function inputValue(labels, value, line) {
-  // Can't handle this case at all
-  if ( value === undefined ) return value;
+  return i.matches.splice(1)                    // First match is whole line
+                  .filter(n => n !== undefined) // Undefined match is path in regexp not taken
+                  .map(value => {
+                    value = '' + value;         // Make sure value is string for matching
 
-  // Make sure value is string for matching
-  value = '' + value;
+                    // Are we values?
+                    if ( value.match(`^${e.vals}$`) ) {
+                      // Always treat as array, to make life easier
+                      value = value.split(',').map(v => v.trim());
+                      try {
+                        return valuesToBytes(value);
+                      } catch(e) {
+                        i.errors.push(e);
+                        return [];
+                      }
+                    }
 
-  // If known label, we're good
-  if ( labels[value] ) return labels[value];
-
-  // If not numeric value(s), give error
-  if ( !value.match(`^${e.values}$`) ) {
-    labels['$errors'].push(`\nError on line ${line}:\n\tI can't find label '${value}'`);
-    return 0;
-  }
-
-  // Otherwise, parse numeric value(s)
-  values = value.split(',').map(v => v.trim());
-  const results = [];
-
-  values.forEach(value => {
-    result = any2bytes(value);
-
-    if ( result.length == 0 )
-      labels['$errors'].push(`\nError on line ${line}:\n\tInvalid value '${value}'`);
-    else
-      results.push(...result);
-  });
-
-  if ( results.length == 1 ) return results[0];
-  return results;
+                    // Otherwise, we're probably a label
+                    else
+                      return value;
+                  })
+                  .flat();
 }
 
 // Take any input and try to make an array of bytes from it
-function any2bytes(any) {
-  if ( any.match(e.hex) ) return [parseInt(any.substr(1), 16)];
-  if ( any.match(e.bin) ) return [parseInt(any.substr(1), 2)];
-  if ( any.match(e.dec) ) return [parseInt(any, 10)];
-  if ( any.match(e.str) ) return any.split('').map(c => c.charCodeAt(0));
-  return [];
+function valuesToBytes(values) {
+  return values.map(value => {
+    if ( value.match(e.hex) ) return parseInt(value.substr(1), 16);
+    if ( value.match(e.bin) ) return parseInt(value.substr(1), 2);
+    if ( value.match(e.dec) ) return parseInt(value, 10);
+
+    // If input is a string, output it as ascii bytes, without the quotes
+    if ( value.match(e.str) ) return value.substr(1, value.length-2).split('').map(c => c.charCodeAt(0));
+
+    throw(`Invalid value '${value}'`);
+  }).flat();
 }

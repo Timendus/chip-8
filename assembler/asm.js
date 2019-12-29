@@ -8,7 +8,7 @@ const fs       = require('fs');
 const s        = require('./../emulator/binary_strings');
 
 if ( !argv.file ) {
-  return console.error('\nYou need to specify a file to compile.\n\n./asm.js --file myprogram.asm --output binary.ch8');
+  return console.error('\nYou need to specify a file to compile.\n\n./asm.js --file myprogram.asm [--output binary.ch8] [--outputModel] [--outputLabels]');
 }
 
 let file;
@@ -19,7 +19,10 @@ try {
 }
 
 try {
-  file = compiler(file);
+  file = compiler(file, {
+    outputModel:  argv.outputModel  ? true : null,
+    outputLabels: argv.outputLabels ? true : null
+  });
 } catch(e) {
   return console.error(`${e}`);
 }
