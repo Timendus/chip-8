@@ -1,4 +1,4 @@
-const e = require('./expressions');
+const e = require('../shared/expressions');
 
 module.exports = [
   {

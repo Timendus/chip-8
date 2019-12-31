@@ -5,7 +5,7 @@
 const compiler = require('./index');
 const argv     = require('yargs').argv;
 const fs       = require('fs');
-const s        = require('./../emulator/binary_strings');
+const s        = require('./../shared/binary_strings');
 
 if ( !argv.file ) {
   return console.error('\nYou need to specify a file to compile.\n\n./asm.js --file myprogram.asm [--output binary.ch8] [--outputModel] [--outputLabels]');

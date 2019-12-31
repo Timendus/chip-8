@@ -1,9 +1,9 @@
 // This is the importable module form of the assembler
 
-const opcodes    = require('./opcodes');
+const opcodes    = require('../shared/opcodes');
 const directives = require('./directives');
-const e          = require('./expressions');
-const s          = require('../emulator/binary_strings');
+const e          = require('../shared/expressions');
+const s          = require('../shared/binary_strings');
 
 module.exports = (source, options) => {
 
@@ -13,8 +13,9 @@ module.exports = (source, options) => {
     outputLabels: false
   }, options);
 
-  const lines  = source.split('\n');
-  const model  = [];
+  const lines       = source.split('\n');
+  const model       = [];
+  let   lastAddress = 0;
 
   lines.forEach((line, linenum) => {
     line = line.split(';')[0];  // Strip out comments
@@ -33,25 +34,22 @@ module.exports = (source, options) => {
         errors: [`I don't know how to interpret '${line.trim()}'`]
       });
 
-    // Make a copy of the opcode or directive and add specific fields
-    const clone = { ...interpretation };
+    // Make a copy of the opcode or directive and set the fields that we can
+    const clone      = { ...interpretation };
     clone.matches    = line.trim().match(clone.instruction);
     clone.line       = linenum + 1;
     clone.errors     = [];
     clone.parameters = getParams(clone);
+    clone.address    = lastAddress;
+
+    // Update address
+    if ( clone.getAddress )
+      lastAddress = clone.getAddress(lastAddress, clone.parameters);
+    if ( clone.size )
+      lastAddress += clone.size;
 
     // Done! Next!
     model.push(clone);
-  });
-
-  // Give every entry in the model its address
-  let lastAddress = 0;
-  model.forEach(m => {
-    m.address = lastAddress;
-    if ( m.getAddress )
-      lastAddress = m.getAddress(lastAddress, m.parameters);
-    if ( m.size )
-      lastAddress += m.size;
   });
 
   // Collect all labels
