@@ -443,7 +443,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}33`,
-    instruction: `bcd (i),${e.reg}$`,
+    instruction: `bcd \\(i\\),${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x33],
     disassemble: ([x]) => `bcd (i), v${x}`,
 
@@ -457,7 +457,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}55`,
-    instruction: `ld \\(i\\),${e.reg}$`,
+    instruction: `ld \\(i\\),\\s?(?:v0\\-)?${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x55],
     disassemble: ([x]) => `ld (i), v${x}`,
 
@@ -472,7 +472,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}65`,
-    instruction: `ld ${e.reg},\\s?\\(i\\)$`,
+    instruction: `ld (?:v0\\-)?${e.reg},\\s?\\(i\\)$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x65],
     disassemble: ([x]) => `ld v${x}, (i)`,
 
