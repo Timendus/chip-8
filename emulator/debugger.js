@@ -1,4 +1,4 @@
-const s    = require('./binary_strings');
+const s    = require('../shared/binary_strings');
 const dbgr = document.getElementById('debugger');
 
 module.exports = {
