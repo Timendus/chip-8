@@ -14,19 +14,24 @@
       <section class="left">
 
         <ul class="tabs">
-          <li class="active" data-target="#editor">Editor</li>
+          <li class="active" data-target="#editor-pane">Editor</li>
           <li data-target="#debugger">Debugger</li>
-          <li data-target="#disassembler">Disassembler</li>
+          <li data-target="#disassembler-pane">Disassembler</li>
         </ul>
 
         <section class="tab-panel">
-          <section class="tab-pane active editor" id="editor">
-            <ul class="editor-controls">
-              <li id="run">Compile & Run ▷</li>
-            </ul>
+          <section class="tab-pane active" id="editor-pane">
+            <section class="editor" id="editor">
+              <ul class="editor-controls">
+                <li id="run">Compile & Run ▷</li>
+              </ul>
+              <section class="errors" id="errors"></section>
+            </section>
           </section>
           <kbd class="tab-pane debugger" id="debugger"></kbd>
-          <section class="tab-pane active editor" id="disassembler"></section>
+          <section class="tab-pane" id="disassembler-pane">
+            <section class="editor" id="disassembler"></section>
+          </section>
         </section>
 
       </section>
@@ -52,7 +57,7 @@
           <button id="play">Pause</button>
           <button id="step" disabled>Step</button>
           <button id="reset">Reset</button>
-          <button id="show_opc">Instructions</button>
+          <button id="show_opc">Log opcodes</button>
         </section>
 
       </section>

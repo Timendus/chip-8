@@ -41,6 +41,15 @@ drawChar:
   tabSize: 2
 });
 
+// Initialize disassembly viewer
+const disasmViewer = editor(document.querySelector('#disassembler'), {
+  value: '',
+  mode: "z80",
+  theme: 'monokai',
+  tabSize: 2,
+  editable: false
+});
+
 let currentState;
 let currentProgram;
 let playing = true;
@@ -68,7 +77,17 @@ document.querySelectorAll('ul.tabs li').forEach(t => {
 
 document.getElementById('run').addEventListener('click', e => {
   const program = codeEditor.doc.getValue();
-  const data    = asm(program);
+  const errors  = document.getElementById('errors');
+  let data;
+
+  try {
+    data = asm(program);
+  } catch(e) {
+    errors.innerText = e;
+    return;
+  }
+
+  errors.innerText = '';
   startProgram(data);
 });
 
@@ -115,15 +134,7 @@ function startProgram(program) {
   sound.connect(currentState);
 
   console.info(`Program read from disk:\n\n${disasm.disassemble(program)}\n\nLoading into RAM...`);
-
-  // Output disassembled program to disassembly editor
-  const codeEditor = editor(document.querySelector('#disassembler'), {
-    value: disasm.disassemble(program),
-    mode: "z80",
-    theme: 'monokai',
-    tabSize: 2,
-    editable: false
-  });
+  disasmViewer.doc.setValue(disasm.disassemble(program));
 
   writePointer = 0x200;
   for ( let byte of program ) {

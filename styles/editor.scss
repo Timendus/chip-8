@@ -1,22 +1,24 @@
 section.editor {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   max-height: calc(100vh - 54px);
   overflow-y: auto;
   background-color: #272822;
-  padding: 2em 1em;
 
   .CodeMirror {
-    height: 100%;
+    flex: 1 1 100vh;
+    order: 2;
+    margin: 2em 1em;
   }
 
   ul.editor-controls {
-    position: absolute;
-    top: 0;
-    right: 0;
     list-style: none;
     margin: 0;
     padding: 0;
+    order: 1;
+    flex: 0 0 0;
+    text-align: right;
 
     li {
       display: inline-block;
@@ -26,5 +28,14 @@ section.editor {
       font-size: 10px;
       cursor: pointer;
     }
+  }
+
+  section.errors {
+    flex: 0 0 10vh;
+    border-top: 2px solid #555;
+    order: 3;
+    color: white;
+    padding: 0em 1em 1em 1em;
+    overflow-y: auto;
   }
 }
