@@ -39,7 +39,7 @@ module.exports = [
     bytes:       `0${e.nnn}`,
     instruction: `rcall ${e.loc}$`,
     assemble:    ([nnn]) => [0x00 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
-    disassemble: ([nnn]) => `rcall ${nnn}`,
+    disassemble: ([nnn]) => `rcall $0${nnn}`,
 
     run: (state, [nnn]) => {
       console.error('RCA 1802 Not implemented');
@@ -51,7 +51,7 @@ module.exports = [
     bytes:       `1${e.nnn}`,
     instruction: `jp ${e.loc}$`,
     assemble:    ([nnn]) => [0x10 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
-    disassemble: ([nnn]) => `jp ${nnn}`,
+    disassemble: ([nnn]) => `jp $0${nnn}`,
 
     run: (state, [nnn]) => {
       // Step back one instruction because we step ahead later
@@ -64,7 +64,7 @@ module.exports = [
     bytes:       `2${e.nnn}`,
     instruction: `call ${e.loc}$`,
     assemble:    ([nnn]) => [0x20 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
-    disassemble: ([nnn]) => `call ${nnn}`,
+    disassemble: ([nnn]) => `call $0${nnn}`,
 
     run: (state, [nnn]) => {
       state.ram[state.sp - 0] = (state.pc & 0xff00) / 0x100;
@@ -80,7 +80,7 @@ module.exports = [
     bytes:       `3${e.x}${e.nn}`,
     instruction: `se ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x30 | x & 0xF, nn & 0xFF],
-    disassemble: ([x, nn]) => `se v${x}, ${nn}`,
+    disassemble: ([x, nn]) => `se v${x}, $${nn}`,
 
     run: (state, [x, nn]) => {
       if ( state.v[x] === nn ) state.pc += 2;
@@ -92,7 +92,7 @@ module.exports = [
     bytes:       `4${e.x}${e.nn}`,
     instruction: `sne ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x40 | x & 0xF, nn & 0xFF],
-    disassemble: ([x, nn]) => `sne v${x}, ${nn}`,
+    disassemble: ([x, nn]) => `sne v${x}, $${nn}`,
 
     run: (state, [x, nn]) => {
       if ( state.v[x] !== nn ) state.pc += 2;
@@ -116,7 +116,7 @@ module.exports = [
     bytes:       `6${e.x}${e.nn}`,
     instruction: `ld ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x60 | x & 0xF, nn & 0xFF],
-    disassemble: ([x, nn]) => `ld v${x}, ${nn}`,
+    disassemble: ([x, nn]) => `ld v${x}, $${nn}`,
 
     run: (state, [x, nn]) => {
       state.v[x] = nn;
@@ -128,7 +128,7 @@ module.exports = [
     bytes:       `7${e.x}${e.nn}`,
     instruction: `add ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0x70 | x & 0xF, nn & 0xFF],
-    disassemble: ([x, nn]) => `add v${x}, ${nn}`,
+    disassemble: ([x, nn]) => `add v${x}, $${nn}`,
 
     run: (state, [x, nn]) => {
       state.v[x] += nn;
@@ -273,7 +273,7 @@ module.exports = [
     bytes:       `A${e.nnn}`,
     instruction: `ld i,${e.loc}$`,
     assemble:    ([nnn]) => [0xA0 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
-    disassemble: ([nnn]) => `ld i, ${nnn}`,
+    disassemble: ([nnn]) => `ld i, $0${nnn}`,
 
     run: (state, [nnn]) => {
       state.i = nnn;
@@ -285,7 +285,7 @@ module.exports = [
     bytes:       `B${e.nnn}`,
     instruction: `jp v0,${e.loc}$`,
     assemble:    ([nnn]) => [0xB0 | (nnn & 0xF00) / 0x100, nnn & 0xFF],
-    disassemble: ([nnn]) => `jp v0, ${nnn}`,
+    disassemble: ([nnn]) => `jp v0, $0${nnn}`,
 
     run: (state, [nnn]) => {
       state.pc = nnn + state.v[0] - 2; // Step back one instruction because we step ahead later
@@ -297,7 +297,7 @@ module.exports = [
     bytes:       `C${e.x}${e.nn}`,
     instruction: `rand ${e.reg},${e.val}$`,
     assemble:    ([x, nn]) => [0xC0 | x & 0xF, nn & 0xFF],
-    disassemble: ([x, nn]) => `rand v${x}, ${nn}`,
+    disassemble: ([x, nn]) => `rand v${x}, $${nn}`,
 
     run: (state, [x, nn]) => {
       state.v[x] = Math.floor(Math.random() * 0x100) & nn;
@@ -309,7 +309,7 @@ module.exports = [
     bytes:       `D${e.x}${e.y}${e.n}`,
     instruction: `drw ${e.reg},${e.reg},${e.val}$`,
     assemble:    ([x, y, n]) => [0xD0 | x & 0xF, (y & 0xF) * 0x10 | n & 0xF],
-    disassemble: ([x, y, n]) => `drw v${x}, v${y}, ${nn}`,
+    disassemble: ([x, y, n]) => `drw v${x}, v${y}, $${n}`,
 
     run: (state, [x, y, n]) => {
       // Set VF to 01 if any set pixels are changed to unset, and 00 otherwise
