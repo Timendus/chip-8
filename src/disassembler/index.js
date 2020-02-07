@@ -8,7 +8,7 @@ module.exports = (binary, options) => {
   for ( let pc = 0; pc < binary.length; pc += 2 ) {
     const highByte  = binary[pc];
     const lowByte   = binary[pc+1];
-    const opcode    = s.bin2str([highByte, lowByte], '');
+    const opcode    = s.bin2str([highByte, lowByte], '').toUpperCase();
 
     // Which opcode do these bytes match with?
     const interpretation = opcodes.find(o => opcode.match(o.bytes));
