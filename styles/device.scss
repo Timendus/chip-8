@@ -1,0 +1,40 @@
+.device {
+  width: 316px;
+  height: 470px;
+  padding: 30px;
+  background-color: #333;
+  border-radius: 30px;
+  margin: 0 auto;
+
+  canvas {
+    width: 256px;
+    height: 128px;
+    background-color: #777;
+    border-radius: 5px;
+
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .keyboard {
+    text-align: center;
+    margin-top: 20px;
+
+    button {
+      margin: 5px 2px;
+      width: 55px;
+      height: 55px;
+      border: 2px solid #777;
+      background-color: #CCC;
+      border-radius: 5px;
+      user-select: none;
+
+      &.active, &:active {
+        background-color: #999;
+        color: #EEE;
+      }
+    }
+  }
+}

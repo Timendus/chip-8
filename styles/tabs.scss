@@ -1,0 +1,29 @@
+ul.tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background-color: #1a1b17;
+
+  li {
+    display: inline-block;
+    padding: 1em;
+    color: white;
+    cursor: pointer;
+
+    &.active {
+      border-bottom: 3px solid white;
+    }
+  }
+}
+
+section.tab-panel {
+  flex: 1 1 0;
+}
+
+.tab-pane {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
