@@ -1,0 +1,15 @@
+kbd.debugger {
+  position: relative;
+  height: 100%;
+  max-height: calc(100vh - 54px);
+  background-color: #272822;
+  padding: 2em 1em;
+
+  overflow: hidden;
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+
+  font-family: monospace;
+  color: white;
+}

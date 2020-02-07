@@ -11,10 +11,13 @@ your spare time, isn't it? 😉
 
 See it in action at https://timendus.github.io/chip-8/. You can find some
 CHIP-8 programs [here](https://github.com/dmatlack/chip8) (and everywhere else
-on the internet, just Google) or you can try
-[my own simple creations](https://github.com/Timendus/chip-8/tree/master/assembly).
+on the internet, just Google) or you can try [my own simple creations](assembly).
 Just download the binaries (`*.ch8` seems to be the convention) and load them
-into the emulator.
+into the emulator ("Load file" button on the right).
+
+Or if you're the tinkering kind of person, open the `*.asm` files
+from [my playthings](assembly) and copy'n'paste them into the code editor on the
+left. Clicking "Compile & Run" should get you going. See [The assembler](#the-assembler) below for more information.
 
 ### Reliability
 
@@ -23,16 +26,21 @@ a couple of side effects to opcodes being documented differently by different
 sources. Hard to tell which is the right implementation. Also, I have no idea at
 what speed this thing is supposed to run, other than that the timers run at 60Hz.
 
-But anyway, most programs seem to run pretty well. If you find a bug with the
-emulator still, please make a PR or at least submit an issue ;)
+(There is currently [a known issue](https://github.com/Timendus/chip-8/issues/2)
+where the timing messes up if you don't refresh the page between loading
+programs)
+
+But other than that, most programs seem to run pretty well. If you find a bug
+with the emulator still, please make a PR or at least
+[submit an issue](https://github.com/Timendus/chip-8/issues/new) 😄
 
 ### Debugging features
 
-When you load a program, it gets disassembled to the browser console. You can
-also see the currently running instructions there by toggling "Instructions".
-Note that this outputs a lot of instructions, pretty quickly. So this is mostly
-useful for stepping through the code. Combined with the "Debugger" feature, this
-should make it pretty usable as a development emulator.
+When you load a program, it gets disassembled to the "Disassembler" tab. You can
+also see the currently running instructions in the browser console by toggling
+"Log opcodes". Note that this outputs a lot of instructions, pretty quickly. So
+this is mostly useful for stepping through the code. Combined with the
+"Debugger" tab, this should make it pretty usable as a development emulator.
 
 ### Keys
 
@@ -61,7 +69,14 @@ it either, it's probably "fixable" 😉. In my opinion it mostly really misses
 Also, having just one word-sized index register (`i`) makes it tricky to do
 the simplest things like keeping track of which character you're outputting
 while also looking up the sprite data for that character. I used an offset
-register to work around this in my [`hello_world` program](https://github.com/Timendus/chip-8/blob/master/assembly/hello_world.asm).
+register to work around this in my [`hello_world` program](assembly/hello_world.asm).
+
+### Opcodes and syntax
+
+I couldn't find much information on what is "normal" syntax for CHIP-8 assembler,
+so I just based mine on z80 with some extra instructions. I'm sure if you take a
+look at [the examples](assembly) (and maybe read up on CHIP-8 a little) you'll
+get the hang of it in no time.
 
 ### Reliability
 
@@ -70,8 +85,11 @@ equally applicable to the assembler 😂
 
 ### Usage on the command line
 
+Besides the web version you can use the assembler from the command line too:
+
 ```bash
-$ cd assembler
+$ cd src/assembler
+$ npm install
 $ ./asm.js
 
 You need to specify a file to compile.
@@ -82,6 +100,5 @@ You need to specify a file to compile.
 If you don't specify an output file with the --output flag, it will just spit
 out bytes to the console in HEX format.
 
-The command line syntax could be much better, but my goal with this (if I ever
-do any more work on this project) would be to have an editor and an assembler in
-the webbrowser. For some on-the-go fun.
+The command line syntax could be much better, but my goal with this was to have
+an editor and an assembler in the webbrowser. For some on-the-go fun.

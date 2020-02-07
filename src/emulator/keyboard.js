@@ -51,6 +51,8 @@ const keyMap = {
 }
 
 window.addEventListener('keydown', e => {
+  // Don't catch events if emulator is not in focus
+  if ( !document.querySelector('section.right').contains(document.activeElement) ) return;
   if ( keyMap[e.key] == null ) return;
   kbdState[keyMap[e.key]] = true;
   const button = document.getElementById('Btn'+keyMap[e.key]);
@@ -59,6 +61,8 @@ window.addEventListener('keydown', e => {
 });
 
 window.addEventListener('keyup', e => {
+  // Don't catch events if emulator is not in focus
+  if ( !document.querySelector('section.right').contains(document.activeElement) ) return;
   if ( keyMap[e.key] == null ) return;
   kbdState[keyMap[e.key]] = false;
   const button = document.getElementById('Btn'+keyMap[e.key]);
