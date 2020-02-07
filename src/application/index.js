@@ -8,6 +8,7 @@ const disasm = require('../emulator/disassembler');
 const asm    = require('../assembler');
 const editor = require('codemirror');
 require('codemirror/mode/z80/z80.js');
+require('codemirror/addon/display/autorefresh.js');
 
 // Initialize code editor
 const codeEditor = editor(document.querySelector('#editor'), {
@@ -38,7 +39,8 @@ drawChar:
   mode: "z80",
   lineNumbers: true,
   theme: 'monokai',
-  tabSize: 2
+  tabSize: 2,
+  autoRefresh: true
 });
 
 // Initialize disassembly viewer
@@ -47,7 +49,8 @@ const disasmViewer = editor(document.querySelector('#disassembler'), {
   mode: "z80",
   theme: 'monokai',
   tabSize: 2,
-  editable: false
+  editable: false,
+  autoRefresh: true
 });
 
 let currentState;
