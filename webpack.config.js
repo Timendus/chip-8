@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
 
   entry: {
-    'index': './emulator/index.js'
+    'index': './src/application/index.js'
   },
 
 	output: {

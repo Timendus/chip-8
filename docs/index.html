@@ -9,30 +9,56 @@
   </head>
 
   <body>
-    <section class="device">
-      <canvas id="display"></canvas>
+    <section class="layout">
 
-      <section class="keyboard">
-        <button id="Btn1">1</button>  <button id="Btn2">2</button> <button id="Btn3">3</button>  <button id="Btn12">C</button><br/>
-        <button id="Btn4">4</button>  <button id="Btn5">5</button> <button id="Btn6">6</button>  <button id="Btn13">D</button><br/>
-        <button id="Btn7">7</button>  <button id="Btn8">8</button> <button id="Btn9">9</button>  <button id="Btn14">E</button><br/>
-        <button id="Btn10">A</button> <button id="Btn0">0</button> <button id="Btn11">B</button> <button id="Btn15">F</button>
+      <section class="left">
+
+        <ul class="tabs">
+          <li class="active" data-target="#editor">Editor</li>
+          <li data-target="#debugger">Debugger</li>
+          <li data-target="#disassembler">Disassembler</li>
+        </ul>
+
+        <section class="tab-panel">
+          <section class="tab-pane active editor" id="editor">
+            <ul class="editor-controls">
+              <li id="run">Compile & Run ▷</li>
+            </ul>
+          </section>
+          <kbd class="tab-pane debugger" id="debugger"></kbd>
+          <section class="tab-pane active editor" id="disassembler"></section>
+        </section>
+
       </section>
-    </section>
 
-    <section class="controls">
-      <label>
-        <input type="file" id="upload"></input>
-        Load file
-      </label>
-      <button id="play">Pause</button>
-      <button id="step" disabled>Step</button>
-      <button id="reset">Reset</button>
-      <button id="show_dbg">Debugger</button>
-      <button id="show_opc">Instructions</button>
-    </section>
+      <section class="right">
 
-    <kbd id="debugger"></kbd>
+        <section class="device">
+          <canvas id="display"></canvas>
+
+          <section class="keyboard">
+            <button id="Btn1">1</button>  <button id="Btn2">2</button> <button id="Btn3">3</button>  <button id="Btn12">C</button><br/>
+            <button id="Btn4">4</button>  <button id="Btn5">5</button> <button id="Btn6">6</button>  <button id="Btn13">D</button><br/>
+            <button id="Btn7">7</button>  <button id="Btn8">8</button> <button id="Btn9">9</button>  <button id="Btn14">E</button><br/>
+            <button id="Btn10">A</button> <button id="Btn0">0</button> <button id="Btn11">B</button> <button id="Btn15">F</button>
+          </section>
+        </section>
+
+        <section class="controls">
+          <label>
+            <input type="file" id="upload"></input>
+            Load file
+          </label>
+          <button id="play">Pause</button>
+          <button id="step" disabled>Step</button>
+          <button id="reset">Reset</button>
+          <button id="show_dbg">Debugger</button>
+          <button id="show_opc">Instructions</button>
+        </section>
+
+      </section>
+
+    </section>
   </body>
 
 </html>
