@@ -11,31 +11,6 @@
   <body>
     <section class="layout">
 
-      <section class="left">
-
-        <ul class="tabs">
-          <li class="active" data-target="#editor-pane">Editor</li>
-          <li data-target="#debugger">Debugger</li>
-          <li data-target="#disassembler-pane">Disassembler</li>
-        </ul>
-
-        <section class="tab-panel">
-          <section class="tab-pane active" id="editor-pane">
-            <section class="editor" id="editor">
-              <ul class="editor-controls">
-                <li id="run">Compile & Run ▷</li>
-              </ul>
-              <section class="errors" id="errors"></section>
-            </section>
-          </section>
-          <kbd class="tab-pane debugger" id="debugger"></kbd>
-          <section class="tab-pane" id="disassembler-pane">
-            <section class="editor" id="disassembler"></section>
-          </section>
-        </section>
-
-      </section>
-
       <section class="right">
 
         <section class="device">
@@ -58,6 +33,31 @@
           <button id="step" disabled>Step</button>
           <button id="reset">Reset</button>
           <button id="show_opc">Log opcodes</button>
+        </section>
+
+      </section>
+
+      <section class="left">
+
+        <ul class="tabs">
+          <li class="active" data-target="#editor-pane">Editor</li>
+          <li data-target="#debugger">Debugger</li>
+          <li data-target="#disassembler-pane">Disassembler</li>
+        </ul>
+
+        <section class="tab-panel">
+          <section class="tab-pane active" id="editor-pane">
+            <section class="editor" id="editor">
+              <ul class="editor-controls">
+                <li id="run">Compile & Run ▷</li>
+              </ul>
+              <section class="errors" id="errors"></section>
+            </section>
+          </section>
+          <kbd class="tab-pane debugger" id="debugger"></kbd>
+          <section class="tab-pane" id="disassembler-pane">
+            <section class="editor" id="disassembler"></section>
+          </section>
         </section>
 
       </section>
