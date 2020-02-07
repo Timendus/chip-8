@@ -14,7 +14,7 @@ section.layout {
     left: 0;
     top: 0;
     bottom: 0;
-    right: 400px;
+    right: 43vw;
     display: flex;
     flex-direction: column;
   }
@@ -24,7 +24,7 @@ section.layout {
     right: 0;
     top: 0;
     bottom: 0;
-    left: calc(100% - 400px);
+    left: calc(100% - 43vw);
     padding-top: 10vh;
   }
 }
