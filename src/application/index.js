@@ -97,15 +97,6 @@ document.getElementById('reset').addEventListener('click', () => {
   startProgram(currentProgram);
 });
 
-document.getElementById('show_dbg').addEventListener('click', () => {
-  debugging.debugger = !debugging.debugger;
-  if ( currentState )
-    currentState.debugging = debugging;
-  document.getElementById('show_dbg').classList.toggle('active');
-  if ( !debugging.debugger )
-    document.getElementById('debugger').innerText = '';
-});
-
 document.getElementById('show_opc').addEventListener('click', () => {
   debugging.opcodes = !debugging.opcodes;
   if ( currentState )
