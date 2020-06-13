@@ -1,6 +1,7 @@
-const s       = require('../shared/binary_strings');
-const opcodes = require('../shared/opcodes');
-const display = require('./display');
+const s        = require('../shared/binary_strings');
+const opcodes  = require('../shared/opcodes');
+const display  = require('./display');
+const keyboard = require('./keyboard');
 
 module.exports = {
   new: () => ({
@@ -39,7 +40,8 @@ async function step(state) {
       state,
       opcode.match(interpretation.bytes)
             .splice(1)
-            .map(hex => parseInt(hex, 16))
+            .map(hex => parseInt(hex, 16)),
+      keyboard
     );
 
     if ( state.debugging.opcodes )
