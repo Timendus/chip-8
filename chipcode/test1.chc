@@ -1,0 +1,22 @@
+/***
+ * The first test file written in "CHIPcode", a very simple and very crappy
+ * C-style high(er) level programming language for CHIP-8!
+ */
+
+byte current = 1;
+byte end = 10;
+byte sum = 0;
+
+while ( current < end ) {
+  sum = sum + current * current;
+  current = current + 1;
+}
+
+// sum == sum of squares from 1 to 10
+// Result should be 385
+print(sum);
+
+// Todo: function definitions
+// function square(x) {
+//   return x * x;
+// }
