@@ -76,7 +76,7 @@ document.querySelectorAll('ul.tabs li').forEach(t => {
   });
 });
 
-// Hook up Compile & Run button
+// Hook up Assemble & Run button
 
 document.getElementById('run').addEventListener('click', e => {
   const program = codeEditor.doc.getValue();

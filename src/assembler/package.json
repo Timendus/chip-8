@@ -1,5 +1,5 @@
 {
-  "name": "chip-compiler",
+  "name": "chip-assembler",
   "dependencies": {
     "yargs": "^15.0.2"
   }

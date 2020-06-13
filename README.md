@@ -17,7 +17,7 @@ into the emulator ("Load file" button on the right).
 
 Or if you're the tinkering kind of person, open the `*.asm` files
 from [my playthings](assembly) and copy'n'paste them into the code editor on the
-left. Clicking "Compile & Run" should get you going. See [The assembler](#the-assembler) below for more information.
+left. Clicking "Assemble & Run" should get you going. See [The assembler](#the-assembler) below for more information.
 
 ### Reliability
 
@@ -92,7 +92,7 @@ $ cd src/assembler
 $ npm install
 $ ./asm.js
 
-You need to specify a file to compile.
+You need to specify a file to assemble.
 
 ./asm.js --file myprogram.asm [--output binary.ch8] [--outputModel] [--outputLabels]
 ```

@@ -2,13 +2,13 @@
 
 // This is the command line executable form of the assembler
 
-const compiler = require('./index');
-const argv     = require('yargs').argv;
-const fs       = require('fs');
-const s        = require('./../shared/binary_strings');
+const assembler = require('./index');
+const argv      = require('yargs').argv;
+const fs        = require('fs');
+const s         = require('./../shared/binary_strings');
 
 if ( !argv.file ) {
-  return console.error('\nYou need to specify a file to compile.\n\n./asm.js --file myprogram.asm [--output binary.ch8] [--outputModel] [--outputLabels]');
+  return console.error('\nYou need to specify a file to assemble.\n\n./asm.js --file myprogram.asm [--output binary.ch8] [--outputModel] [--outputLabels]');
 }
 
 let file;
@@ -19,7 +19,7 @@ try {
 }
 
 try {
-  file = compiler(file, {
+  file = assembler(file, {
     outputModel:  argv.outputModel  ? true : null,
     outputLabels: argv.outputLabels ? true : null
   });
