@@ -4,7 +4,7 @@ const state  = require('../emulator/state');
 const font   = require('../emulator/font');
 const timers = require('../emulator/timers');
 const sound  = require('../emulator/sound');
-const disasm = require('../emulator/disassembler');
+const disasm = require('../disassembler');
 const asm    = require('../assembler');
 const editor = require('codemirror');
 require('codemirror/mode/z80/z80.js');
@@ -136,8 +136,8 @@ function startProgram(program) {
   timers.connect(currentState);
   sound.connect(currentState);
 
-  console.info(`Program read from disk:\n\n${disasm.disassemble(program)}\n\nLoading into RAM...`);
-  disasmViewer.doc.setValue(disasm.disassemble(program));
+  console.info(`Program read from disk:\n\n${disasm(program)}\n\nLoading into RAM...`);
+  disasmViewer.doc.setValue(disasm(program));
 
   writePointer = 0x200;
   for ( let byte of program ) {
