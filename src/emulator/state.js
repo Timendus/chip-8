@@ -1,5 +1,5 @@
 const s       = require('../shared/binary_strings');
-const opcodes = require('./opcodes');
+const opcodes = require('../shared/opcodes');
 const display = require('./display');
 
 module.exports = {
@@ -27,28 +27,25 @@ module.exports = {
 }
 
 async function step(state) {
-  const highByte  = state.ram[state.pc];
-  const lowByte   = state.ram[state.pc+1];
-  const opcode    = s.bin2str([highByte, lowByte], '');
-  const old_pc    = state.pc;
-  let instruction = "UNKNOWN INSTRUCTION";
+  const highByte = state.ram[state.pc];
+  const lowByte  = state.ram[state.pc+1];
+  const opcode   = s.bin2str([highByte, lowByte], '').toUpperCase();
+  const old_pc   = state.pc;
 
-  // Look up and execute opcode
-  for ( let match in opcodes ) {
-    if ( opcode.match(new RegExp(match, 'i')) ) {
-      instruction = await opcodes[match]({
-        highByte,
-        lowByte,
-        state,
+  const interpretation = opcodes.find(o => opcode.match(o.bytes));
 
-        nnn: (highByte & 0b00001111) * 0x100 + lowByte,
-        nn:  lowByte,
-        n:   lowByte  & 0b00001111,
-        x:   highByte & 0b00001111,
-        y:   (lowByte & 0b11110000) >> 4
-      });
-      break;
-    }
+  if ( interpretation ) {
+    interpretation.run(
+      state,
+      opcode.match(interpretation.bytes)
+            .splice(1)
+            .map(hex => parseInt(hex, 16))
+    );
+
+    if ( state.debugging.opcodes )
+      console.log(`${s.word2str(old_pc)}:\t${opcode}\t${interpretation.disassemble(parameters)}\n`);
+  } else {
+    console.error(`${s.word2str(old_pc)}:\t${opcode}\tUNKNOWN INSTRUCTION\n`);
   }
 
   // Render display if dirty
@@ -56,13 +53,6 @@ async function step(state) {
     display.render(state);
     state.sd = false;
   }
-
-  // Render output if needed/requested
-  const output = `${s.word2str(old_pc)}:\t${opcode}\t${instruction}\n`;
-  if ( instruction == "UNKNOWN INSTRUCTION" )
-    console.error(output);
-  else if ( state.debugging.opcodes )
-    console.info(output);
 
   // Go to next instruction
   state.pc += 2;
