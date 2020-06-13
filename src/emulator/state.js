@@ -37,13 +37,11 @@ function step(state) {
   const interpretation = opcodes.find(o => opcode.match(o.bytes));
 
   if ( interpretation ) {
-    interpretation.run(
-      state,
-      opcode.match(interpretation.bytes)
-            .splice(1)
-            .map(hex => parseInt(hex, 16)),
-      keyboard
-    );
+    const parameters = opcode.match(interpretation.bytes)
+                             .splice(1)
+                             .map(hex => parseInt(hex, 16));
+
+    interpretation.run(state, parameters, keyboard);
 
     if ( state.debugging.opcodes )
       console.log(`${s.word2str(old_pc)}:\t${opcode}\t${interpretation.disassemble(parameters)}\n`);
