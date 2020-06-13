@@ -5,23 +5,11 @@ module.exports = {
     return kbdState[key];
   },
 
-  waitPress: () => {
-    return new Promise((resolve, reject) => {
-      let interval = setInterval(() => {
-        // If any key is pressed, wait for release
-        if ( kbdState.every(b => !b) ) {
-          clearInterval(interval);
-          interval = setInterval(() => {
-            for ( let i in kbdState ) {
-              if ( kbdState[i] ) {
-                clearInterval(interval);
-                return resolve(i);
-              }
-            }
-          }, 10);
-        }
-      }, 10);
-    });
+  anyPressed: () => {
+    if ( kbdState.some(b => b) )
+      return kbdState.findIndex(b => b);
+    else
+      return false;
   }
 }
 

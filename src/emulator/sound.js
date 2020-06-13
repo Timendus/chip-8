@@ -19,10 +19,13 @@ module.exports = {
 
     // Check if we need to start or stop the beep
 
-    setInterval(() => {
+    state.soundInterval = setInterval(() => {
       if ( state.sound >  0 ) gainNode.gain.value = 0.1;
       if ( state.sound == 0 ) gainNode.gain.value = 0;
     }, 17) // 60Hz
 
+  },
+  disconnect: state => {
+    clearInterval(state.soundInterval);
   }
 }

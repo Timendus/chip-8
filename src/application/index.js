@@ -105,14 +105,17 @@ document.getElementById('upload').addEventListener('change', e => {
 
 document.getElementById('play').addEventListener('click', () => {
   playing = !playing;
-  if ( playing ) requestAnimationFrame(run);
+  if ( playing )
+    run();
+  else
+    stop();
   document.getElementById('play').innerText = playing ? 'Pause' : 'Play';
   document.getElementById('step').disabled = playing;
 });
 
 document.getElementById('step').addEventListener('click', () => {
-  state.step(currentState)
-       .then(() => dbgr.render(currentState));
+  state.step(currentState);
+  dbgr.render(currentState);
 });
 
 document.getElementById('reset').addEventListener('click', () => {
@@ -129,6 +132,14 @@ document.getElementById('show_opc').addEventListener('click', () => {
 // Load and run program
 
 function startProgram(program) {
+  // Unload old program
+  if ( currentState ) {
+    stop();
+    timers.disconnect(currentState);
+    sound.disconnect(currentState);
+  }
+
+  // Load new program
   currentProgram = program;
   currentState = state.new();
   currentState.debugging = debugging;
@@ -151,12 +162,12 @@ function startProgram(program) {
 }
 
 function run() {
-  if ( playing )
-    setTimeout(() => {
-      state.tenSteps(currentState)
-      .then(() => {
-        dbgr.render(currentState);
-        run();
-      });
-    }, 17);
+  currentState.tickInterval = setInterval(() => {
+    state.tenSteps(currentState);
+    dbgr.render(currentState);
+  }, 17);
+}
+
+function stop() {
+  clearInterval(currentState.tickInterval);
 }

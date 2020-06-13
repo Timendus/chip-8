@@ -4,6 +4,7 @@
 //   * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 
 const e = require('./expressions');
+let waitingForKey = false;
 
 module.exports = [
 
@@ -342,8 +343,9 @@ module.exports = [
     assemble:    ([x]) => [0xE0 | x & 0xF, 0x9E],
     disassemble: ([x]) => `skp v${x}`,
 
-    run: (state, [x]) => {
-      if ( keyboard.pressed(state.v[x]) ) state.pc += 2;
+    run: (state, [x], keyboard) => {
+      if ( keyboard.pressed(state.v[x]) )
+        state.pc += 2;
     }
   },
 
@@ -354,8 +356,9 @@ module.exports = [
     assemble:    ([x]) => [0xE0 | x & 0xF, 0xA1],
     disassemble: ([x]) => `sknp v${x}`,
 
-    run: (state, [x]) => {
-      if ( !keyboard.pressed(state.v[x]) ) state.pc += 2;
+    run: (state, [x], keyboard) => {
+      if ( !keyboard.pressed(state.v[x]) )
+        state.pc += 2;
     }
   },
 
@@ -378,12 +381,24 @@ module.exports = [
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x0A],
     disassemble: ([x]) => `getkey v${x}`,
 
-    run: (state, [x]) => {
-      // This needs a new, promise-less implementation...
-      return keyboard.waitPress()
-                     .then(key => {
-                       state.v[x] = key;
-                     });
+    run: (state, [x], keyboard) => {
+      const keyPressed = keyboard.anyPressed();
+
+      // First, wait for key release if any key is pressed
+      if ( !waitingForKey ) {
+        state.pc -= 2; // Stay on current instruction
+        if ( !keyPressed )
+          waitingForKey = true;
+
+      // Then, wait for key press
+      } else {
+        if ( !keyPressed )
+          state.pc -= 2; // Stay on current instruction
+        else {
+          waitingForKey = false;
+          state.v[x] = keyPressed;
+        }
+      }
     }
   },
 
