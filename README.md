@@ -26,10 +26,6 @@ a couple of side effects to opcodes being documented differently by different
 sources. Hard to tell which is the right implementation. Also, I have no idea at
 what speed this thing is supposed to run, other than that the timers run at 60Hz.
 
-(There is currently [a known issue](https://github.com/Timendus/chip-8/issues/2)
-where the timing messes up if you don't refresh the page between loading
-programs)
-
 But other than that, most programs seem to run pretty well. If you find a bug
 with the emulator still, please make a PR or at least
 [submit an issue](https://github.com/Timendus/chip-8/issues/new) 😄
