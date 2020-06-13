@@ -4,6 +4,7 @@
 //   * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 
 const e = require('./expressions');
+let waitingForKey = false;
 
 module.exports = [
 
@@ -382,10 +383,22 @@ module.exports = [
 
     run: (state, [x], keyboard) => {
       const keyPressed = keyboard.anyPressed();
-      if ( !keyPressed )
+
+      // First, wait for key release if any key is pressed
+      if ( !waitingForKey ) {
         state.pc -= 2; // Stay on current instruction
-      else
-        state.v[x] = keyPressed;
+        if ( !keyPressed )
+          waitingForKey = true;
+
+      // Then, wait for key press
+      } else {
+        if ( !keyPressed )
+          state.pc -= 2; // Stay on current instruction
+        else {
+          waitingForKey = false;
+          state.v[x] = keyPressed;
+        }
+      }
     }
   },
 
