@@ -153,10 +153,8 @@ function startProgram(program) {
 function run() {
   if ( playing )
     setTimeout(() => {
-      state.tenSteps(currentState)
-      .then(() => {
-        dbgr.render(currentState);
-        run();
-      });
+      state.tenSteps(currentState);
+      dbgr.render(currentState);
+      run();
     }, 17);
 }

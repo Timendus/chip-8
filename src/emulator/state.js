@@ -20,14 +20,15 @@ module.exports = {
     }
   }),
 
-  tenSteps: async state => {
-    for ( let i = 0; i < 10; i++ ) await step(state);
+  tenSteps: state => {
+    for ( let i = 0; i < 10; i++ )
+      step(state);
   },
 
   step
 }
 
-async function step(state) {
+function step(state) {
   const highByte = state.ram[state.pc];
   const lowByte  = state.ram[state.pc+1];
   const opcode   = s.bin2str([highByte, lowByte], '').toUpperCase();
