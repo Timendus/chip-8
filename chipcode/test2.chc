@@ -1,0 +1,29 @@
+/***
+ * The second test file written in "CHIPcode", a very simple and very crappy
+ * C-style high(er) level programming language for CHIP-8!
+ */
+
+clear_screen();
+
+byte current = 1;
+byte sum = 0;
+
+// We can have simple while loops.
+// Also, we can re-assign our variables
+while ( current < 6 ) {
+  sum = sum + current * current;
+  current = current + 1;
+}
+
+// sum == sum of squares from 1 to 5
+print_byte(sum, 1, 1); // >> 55
+
+// Redundant, but for clarity:
+current = 5;
+
+// Loops that count down don't need comparison: any value other than zero will
+// be truthy and zero will be falsy.
+while ( current ) {
+  print_byte(current, 30, (current - 1) * 6 + 1);
+  current = current - 1;
+}
