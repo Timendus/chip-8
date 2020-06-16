@@ -87,19 +87,19 @@ module.exports = (source, options = {}) => {
   try {
     tree = parser.parse(source);
   } catch(e) {
+    let error;
     if ( e.found )
-      console.error(`CHIPcode syntax error: Found '${e.found.replace(/\n/, '\\n')}' at line ${e.location.start.line} column ${e.location.start.column}`);
+      error = `CHIPcode syntax error: Found '${e.found.replace(/\n/, '\\n')}' at line ${e.location.start.line} column ${e.location.start.column}`;
     else
-      console.error(`CHIPcode syntax error: I seem to be missing something at line ${e.location.start.line} column ${e.location.start.column}`);
-    console.error(`I expected any of these:\n${e.expected.map(t => `\t* ${t.description || t.text || t.type}\n`).filter((v,i,a) => a.indexOf(v) === i).join('')}`);
-    // console.error('');
-    // console.error(e);
-    return;
+      error = `CHIPcode syntax error: I seem to be missing something at line ${e.location.start.line} column ${e.location.start.column}`;
+    error += `I expected any of these:\n${e.expected.map(t => `\t* ${t.description || t.text || t.type}\n`).filter((v,i,a) => a.indexOf(v) === i).join('')}`;
+    throw Error(error);
   }
 
   tree = tree.filter(l => l);
 
-  if ( options.outputAST ) console.log(util.inspect(tree, false, null, true));
+  if ( options.outputAST )
+    console.log(util.inspect(tree, false, null, true));
 
   const assembly = [
     `.org $200`,
