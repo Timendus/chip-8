@@ -104,10 +104,10 @@ module.exports = [
     size:        2,
     bytes:       `5${e.x}${e.y}0`,
     instruction: `se ${e.reg},${e.reg}$`,
-    assemble:    ([x, y]) => [0x50 | x & 0xF, y & 0xF * 0x10],
+    assemble:    ([x, y]) => [0x50 | x & 0xF, (y & 0xF) * 0x10],
     disassemble: ([x, y]) => `se v${x}, v${y}`,
 
-    run: (state, [x, nn]) => {
+    run: (state, [x, y]) => {
       if ( state.v[x] === state.v[y] ) state.pc += 2;
     }
   },
@@ -151,7 +151,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.y}1`,
-    instruction: `or ${e.reg},${e.reg}$`,
+    instruction: `^or ${e.reg},${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x1],
     disassemble: ([x, y]) => `or v${x}, v${y}`,
 
@@ -218,13 +218,13 @@ module.exports = [
     size:        2,
     bytes:       `8${e.x}${e.y}6`,
     instruction: `shr ${e.reg}$`,
-    assemble:    ([x]) => [0x80 | x & 0xF, 0x6],
-    disassemble: ([x]) => `shr v${x}`,
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x6],
+    disassemble: ([x, y]) => `shr v${x}, v${y}`,
 
-    run: (state, [x]) => {
+    run: (state, [x, y]) => {
       // Set register VF to the least significant bit prior to the shift
-      state.v[0xF] = state.v[x] & 0b00000001 ? 1 : 0;
-      state.v[x]   = state.v[x] >> 1;
+      state.v[0xF] = state.v[y] & 0b00000001 ? 1 : 0;
+      state.v[x]   = state.v[y] >> 1;
     }
   },
 
@@ -246,14 +246,14 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.y}E`,
-    instruction: `shl ${e.reg}$`,
-    assemble:    ([x]) => [0x80 | x & 0xF, 0xE],
-    disassemble: ([x]) => `shl v${x}`,
+    instruction: `shl ${e.reg},${e.reg}$`,
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0xE],
+    disassemble: ([x, y]) => `shl v${x}, v${y}`,
 
-    run: (state, [x]) => {
+    run: (state, [x, y]) => {
       // Set register VF to the most significant bit prior to the shift
-      state.v[0xF] = state.v[x] & 0b10000000 ? 1 : 0;
-      state.v[x]   = state.v[x] << 1;
+      state.v[0xF] = state.v[y] & 0b10000000 ? 1 : 0;
+      state.v[x]   = state.v[y] << 1;
     }
   },
 
@@ -472,7 +472,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}55`,
-    instruction: `ld \\(i\\),\\s?(?:v0\\-)?${e.reg}$`,
+    instruction: `ld \\(i\\),\\s?(?:v0\\-)${e.reg}$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x55],
     disassemble: ([x]) => `ld (i), v${x}`,
 
@@ -487,7 +487,7 @@ module.exports = [
   {
     size:        2,
     bytes:       `F${e.x}65`,
-    instruction: `ld (?:v0\\-)?${e.reg},\\s?\\(i\\)$`,
+    instruction: `ld (?:v0\\-)${e.reg},\\s?\\(i\\)$`,
     assemble:    ([x]) => [0xF0 | x & 0xF, 0x65],
     disassemble: ([x]) => `ld v${x}, (i)`,
 
