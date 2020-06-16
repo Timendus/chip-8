@@ -1,9 +1,7 @@
 const peg = require('pegjs');
-const fs = require('fs');
 const util = require('util');
 const assembler = require('../assembler');
-
-const stdio = fs.readFileSync(__dirname + '/stdio.asm', { encoding: 'utf8' });
+const stdio = require('./stdio.asm');
 
 const parser = peg.generate(`
   start
@@ -84,7 +82,7 @@ const parser = peg.generate(`
     = ";"
 `);
 
-module.exports = (source, options) => {
+module.exports = (source, options = {}) => {
   let tree;
   try {
     tree = parser.parse(source);
@@ -197,7 +195,6 @@ function declaration(statement) {
   switch(statement.datatype) {
     case 'byte':
       new Variable(statement.name).declare();
-      // variables[statement.name] = nextFreeRegister();
       return [];
     default:
       throw Error(`Unhandled datatype: ${statement.datatype}`);

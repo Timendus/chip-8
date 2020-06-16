@@ -1,18 +1,73 @@
-const s      = require('../shared/binary_strings');
-const dbgr   = require('../emulator/debugger');
-const state  = require('../emulator/state');
-const font   = require('../emulator/font');
-const timers = require('../emulator/timers');
-const sound  = require('../emulator/sound');
-const disasm = require('../disassembler');
-const asm    = require('../assembler');
-const editor = require('codemirror');
+const s       = require('../shared/binary_strings');
+const dbgr    = require('../emulator/debugger');
+const state   = require('../emulator/state');
+const font    = require('../emulator/font');
+const timers  = require('../emulator/timers');
+const sound   = require('../emulator/sound');
+const disasm  = require('../disassembler');
+const asm     = require('../assembler');
+const compile = require('../compiler');
+const editor  = require('codemirror');
 require('codemirror/mode/z80/z80.js');
+require('codemirror/mode/javascript/javascript.js');
 require('codemirror/addon/display/autorefresh.js');
 
-// Initialize code editor
-const codeEditor = editor(document.querySelector('#editor'), {
-  value: `.org $200
+// Initialize CHIPcode editor
+const chipcodeEditor = editor(document.querySelector('#chipcode-editor'), {
+  value: `/***
+ * This is "CHIPcode", a very simple and very crappy C-style high(er) level
+ * programming language for CHIP-8!
+ * This particular program calculates all primes between 1 and 50.
+ */
+
+clear_screen();
+
+byte current = 2;
+byte sum = 0;
+byte xpos = 1;
+byte ypos = 1;
+byte div;
+byte prime;
+
+// Find primes untill we reach 50
+while ( current < 50 ) {
+
+  // Is this a prime number?
+  div = 2;
+  prime = 1;
+  while ( div < current ) {
+    // Long form of 'if ( current % div == 0 )', we don't support modulo
+    if ( current - (div * (current/div)) == 0 ) {
+      prime = 0;
+    }
+    div = div + 1;
+  }
+
+  // If so, then show it
+  if ( prime ) {
+    print_byte(current, xpos, ypos);
+    ypos = ypos + 6;
+    if ( ypos > 30 ) {
+      ypos = 1;
+      xpos = xpos + 20;
+    }
+  }
+
+  current = current + 1;
+}`,
+  mode: "javascript",
+  lineNumbers: true,
+  theme: 'monokai',
+  tabSize: 2,
+  autoRefresh: true
+});
+
+// Initialize assembly editor
+const assemblyEditor = editor(document.querySelector('#assembly-editor'), {
+  value: `; This is my (z80-based) CHIP-8 assembly dialect.
+; This particular program outputs "ABC" on the screen.
+
+  .org $200
 
   ; Setup
   cls
@@ -76,11 +131,29 @@ document.querySelectorAll('ul.tabs li').forEach(t => {
   });
 });
 
+// Hook up Compile & Run button
+
+document.getElementById('compile').addEventListener('click', e => {
+  const program = chipcodeEditor.doc.getValue();
+  const errors  = document.getElementById('chipcode-errors');
+  let data;
+
+  try {
+    data = compile(program);
+  } catch(e) {
+    errors.innerText = e;
+    return;
+  }
+
+  errors.innerText = '';
+  startProgram(data.binary);
+});
+
 // Hook up Assemble & Run button
 
-document.getElementById('run').addEventListener('click', e => {
-  const program = codeEditor.doc.getValue();
-  const errors  = document.getElementById('errors');
+document.getElementById('assemble').addEventListener('click', e => {
+  const program = assemblyEditor.doc.getValue();
+  const errors  = document.getElementById('assembly-errors');
   let data;
 
   try {

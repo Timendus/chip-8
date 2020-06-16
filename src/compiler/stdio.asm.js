@@ -1,7 +1,7 @@
-
+module.exports = `
 ; Standard IO library for CHIPcode
-; Routines in this file may only mess up `v0`
-; Parameter values are at `end_of_program`
+; Routines in this file may only mess up 'v0'
+; Parameter values are at 'end_of_program'
 
 ; clear_screen();
 clear_screen:
@@ -62,3 +62,5 @@ print_byte_draw:
 
 print_byte_buffer:
   .db 0,0,0
+
+`;

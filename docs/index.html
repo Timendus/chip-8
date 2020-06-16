@@ -40,18 +40,27 @@
       <section class="left">
 
         <ul class="tabs">
-          <li class="active" data-target="#editor-pane">Editor</li>
+          <li class="active" data-target="#chipcode-pane">CHIPcode</li>
+          <li data-target="#assembler-pane">Assembler</li>
           <li data-target="#debugger">Debugger</li>
           <li data-target="#disassembler-pane">Disassembler</li>
         </ul>
 
         <section class="tab-panel">
-          <section class="tab-pane active" id="editor-pane">
-            <section class="editor" id="editor">
+          <section class="tab-pane active" id="chipcode-pane">
+            <section class="editor" id="chipcode-editor">
               <ul class="editor-controls">
-                <li id="run">Assemble & Run ▷</li>
+                <li id="compile">Compile & Run ▷</li>
               </ul>
-              <section class="errors" id="errors"></section>
+              <section class="errors" id="chipcode-errors"></section>
+            </section>
+          </section>
+          <section class="tab-pane" id="assembler-pane">
+            <section class="editor" id="assembly-editor">
+              <ul class="editor-controls">
+                <li id="assemble">Assemble & Run ▷</li>
+              </ul>
+              <section class="errors" id="assembly-errors"></section>
             </section>
           </section>
           <kbd class="tab-pane debugger" id="debugger"></kbd>
