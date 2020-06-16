@@ -6,12 +6,13 @@ const value    = `(?:${number}|${string})`;
 const values   = `(?:${value},?\\s*)+`;
 const label    = '[a-zA-Z0-9\-_]+';
 const w        = '\\s?'; // w for whitespace
+const expr     = `${label}${w}\\+${w}${number}`; // Label plus offset
 
 // Instruction parameters for assembler
 const reg      = `${w}v(${nibble}{1,2})${w}`;
 const val      = `${w}(${value})${w}`;
 const vals     = `${w}(${values})${w}`;
-const loc      = `${w}(${number}|${label})${w}`;
+const loc      = `${w}(${number}|${label}|${expr})${w}`;
 const lab      = `(${label})`;
 
 // Hexadecimal values for opcodes
@@ -28,6 +29,7 @@ const dec      = `^[0-9]+$`;
 const str      = `^${string}$`;
 
 module.exports = {
+  label, number, w,
   reg, val, vals, loc, lab,
   x, y, n, nn, nnn,
   hex, bin, dec, str

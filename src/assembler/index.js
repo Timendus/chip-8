@@ -67,6 +67,8 @@ module.exports = (source, options) => {
          m.parameters = m.parameters.map(p => {
            if ( typeof p === 'number' ) return p;
            if ( labels[p] ) return labels[p];
+           if ( [_,l,o] = p.match(`(${e.label})${e.w}\\+${e.w}(${e.number})`) )
+             return labels[l] + 1 * o;
            m.errors.push(`Could not find label '${p}'`);
            return null;
          });
