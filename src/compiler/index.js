@@ -93,7 +93,7 @@ module.exports = (source, options = {}) => {
     else
       error = `CHIPcode syntax error: I seem to be missing something at line ${e.location.start.line} column ${e.location.start.column}`;
     error += `I expected any of these:\n${e.expected.map(t => `\t* ${t.description || t.text || t.type}\n`).filter((v,i,a) => a.indexOf(v) === i).join('')}`;
-    throw Error(error);
+    throw error;
   }
 
   tree = tree.filter(l => l);
@@ -137,11 +137,11 @@ function codeGenerator(tree) {
       case 'functioncall':
         return functioncall(tree);
       default:
-        throw Error(`Unhandled type: ${tree.type}`);
+        throw `Unhandled type: ${tree.type}`;
         return;
     }
 
-  throw Error(`Unknown thing: ${typeof tree}`);
+  throw `Unknown thing: ${typeof tree}`;
 }
 
 const variables = {};
@@ -159,7 +159,7 @@ class Variable {
   nextFreeRegister() {
     const variablesInUse = Object.keys(variables).length;
     if ( variablesInUse >= 14 )
-      throw Error('Too many variables in scope (max 14)');
+      throw 'Too many variables in scope (max 14)';
     else if ( variablesInUse > 0 )
       return Math.max(...Object.values(variables)) + 1;
     else
@@ -176,13 +176,13 @@ class Variable {
   }
 
   release() {
-    if ( !this.declared() ) throw Error(`Unknown variable: '${this._name}'`);
+    if ( !this.declared() ) throw `Unknown variable: '${this._name}'`;
     delete variables[this._name];
     return this;
   }
 
   register() {
-    if ( !this.declared() ) throw Error(`Unknown variable: '${this._name}'`);
+    if ( !this.declared() ) throw `Unknown variable: '${this._name}'`;
     return variables[this._name];
   }
 
@@ -197,7 +197,7 @@ function declaration(statement) {
       new Variable(statement.name).declare();
       return [];
     default:
-      throw Error(`Unhandled datatype: ${statement.datatype}`);
+      throw `Unhandled datatype: ${statement.datatype}`;
   }
 }
 
@@ -314,7 +314,7 @@ function expression(statement, target = 0) {
           one.release();
           break;
         default:
-          throw Error(`Unhandled expression type: ${statement.type}`);
+          throw `Unhandled expression type: ${statement.type}`;
       }
       variable.release();
       return assembly;
@@ -358,7 +358,7 @@ function functioncall(statement, target = 0) {
     'clear_screen',
     'print_byte'
   ].includes(statement.name) )
-    throw Error(`Unknown function '${statement.name}'`);
+    throw `Unknown function '${statement.name}'`;
 
   let assembly;
   if ( statement.parameters.length > 0 )
