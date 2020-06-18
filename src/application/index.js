@@ -169,5 +169,6 @@ function run() {
 }
 
 function stop() {
-  clearInterval(currentState.tickInterval);
+  if ( currentState && currentState.tickInterval )
+    clearInterval(currentState.tickInterval);
 }
