@@ -36,7 +36,7 @@ module.exports = peg.generate(`
     / "raw <<" EOL? instructions:(assembly_instruction*) _ ">>" { return { type: 'assembly', instructions }; }
 
   assembly_instruction
-    = instruction:[a-zA-Z0-9_ \\t,\(\)\+\\n\\r\-]+ { return instruction.join(''); }
+    = instruction:[a-zA-Z0-9_ \\t,\(\)\+\\n\\r;\-]+ { return instruction.join(''); }
 
   functioncall
     = name:name _ "(" _ parameters:(callparameter*) _ ")" EOI { return { type: 'functioncall', name, parameters, location: location() }; }

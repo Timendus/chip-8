@@ -1,0 +1,71 @@
+/***
+ * The fourth test file written in "CHIPcode", a very simple and very crappy
+ * C-style high(er) level programming language for CHIP-8!
+ *
+ * In this file we show we can define and call our own functions and we can
+ * write inline assembly instructions.
+ */
+
+ my_clear_screen();
+
+ byte current = 2;
+ byte sum = 0;
+ byte xpos = 1;
+ byte ypos = 1;
+ byte div;
+ byte prime;
+
+ // Output only numbers that are prime numbers
+ while ( current < 50 ) {
+
+   // Is this a prime number?
+   div = 2;
+   prime = 1;
+   while ( div < current ) {
+     // if ( current % div == 0 )
+     if ( current - (div * (current/div)) == 0 ) {
+       prime = 0;
+     }
+     div = div + 1;
+   }
+
+   // If so, then show it
+   if ( prime ) {
+     my_print_byte(current, xpos, ypos);
+     ypos = ypos + 6;
+     if ( ypos > 30 ) {
+       ypos = 1;
+       xpos = xpos + 20;
+     }
+   }
+
+   current = current + 1;
+ }
+
+// A safe function doesn't mess with any registers
+safe function my_clear_screen() {
+  raw cls // Single line syntax
+}
+
+// For a regular function call we backup all registers
+function my_print_byte(byte value, byte xpos, byte ypos) {
+  // Multiple lines syntax (whitespace is flexible)
+  raw <<
+    ld i, print_byte_buffer
+    bcd (i), value        ; Variable substitution still works
+    ld v0-v0, (i)         ; (we need a different comment syntax here though)
+    getfont v0
+    drw xpos, ypos, 5
+    ld v4, 5
+    add xpos, v4
+    ld i, print_byte_buffer + 1
+    ld v0-v0, (i)
+    getfont v0
+    drw xpos, ypos, 5
+    add xpos, v4
+    ld i, print_byte_buffer + 2
+    ld v0-v0, (i)
+    getfont v0
+    drw xpos, ypos, 5
+  >>
+}
