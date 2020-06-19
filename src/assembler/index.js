@@ -67,8 +67,11 @@ module.exports = (source, options) => {
          m.parameters = m.parameters.map(p => {
            if ( typeof p === 'number' ) return p;
            if ( labels[p] ) return labels[p];
-           if ( [_,l,o] = p.match(`(${e.label})${e.w}\\+${e.w}(${e.number})`) )
-             return labels[l] + 1 * o;
+           matches = p.match(`(${e.label})${e.w}\\+${e.w}(${e.number})`);
+           if ( matches && matches[1] && labels[matches[1]] ) {
+             // We have a label with an offset
+             return labels[matches[1]] + 1 * matches[2];
+           }
            m.errors.push(`Could not find label '${p}'`);
            return null;
          });
