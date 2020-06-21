@@ -1,23 +1,43 @@
-const stdio = require('./stdio.asm');
 const Scope = require('./scope');
 
-let functions = [];
+let functions = {};
 let labels    = 0;
 let tempvars  = 0;
 
-module.exports = tree => {
-  // Before compilation, get a list of available functions in the program
-  functions = getFunctions(tree);
+module.exports = (
+      tree,
+      { addendum = { assembly: '', functions: {} },
+      standalone = true }
+    ) => {
 
-  return [
-    `.org $200`,
-    `begin_of_program:`,
-    ...codeGenerator({ block: tree, scope: new Scope() }),
-    `endless_loop:`,
-    `  jp endless_loop`,
-    stdio,
-    `end_of_program:`
-  ].join('\n');
+  // Before compilation, get a list of available functions in the program
+  const myFunctions = getFunctions(tree);
+  functions = Object.assign(addendum.functions, myFunctions);
+
+  // Generate assembly code, starting in global scope
+  let assembly = codeGenerator({ block: tree, scope: new Scope() });
+
+  if ( standalone ) {
+    assembly = [
+      `.org $200`,
+      `begin_of_program:`,
+         ...assembly,
+      `endless_loop:`,
+      `  jp endless_loop`,
+         addendum.assembly,
+      `end_of_program:`
+    ].join('\n');
+  } else {
+    assembly = [
+      ...assembly,
+      addendum.assembly,
+    ].join('\n');
+  }
+
+  return {
+    assembly: assembly,
+    functions: myFunctions
+  }
 }
 
 function getFunctions(tree) {
@@ -113,16 +133,16 @@ function whileloop({ instruction, scope }) {
   scope.release(result);
 }
 
-function functioncall({ instruction, target = 0, scope }) {
-  stdio_functions = [
-    'clear_screen',
-    'print_byte'
-  ];
+// Functions in CHIPcode work as follows: on function call, we store all vars
+// (referenced registers) in memory and we start with a fresh new scope with
+// only the variables for the parameters. On return, we delete all new vars
+// and reset old vars from memory, except an explicitly returned value.
+// Functions in CHIPcode can't use the global scope and don't have side-effects
+// except when they explicitly write to memory.
 
+function functioncall({ instruction, target = 0, scope }) {
   let func_name;
-  if ( stdio_functions.includes(instruction.name) )
-    func_name = instruction.name;
-  else if ( Object.keys(functions).includes(instruction.name) )
+  if ( Object.keys(functions).includes(instruction.name) )
     func_name = `func_${instruction.name}`;
   else
     throw `Unknown function '${instruction.name}'`;
@@ -174,11 +194,6 @@ function functioncall({ instruction, target = 0, scope }) {
   return assembly;
 }
 
-// New plan: on function call, store all (referenced) vars in memory, restart
-// fresh with just variables for the parameters. On return, delete all new vars
-// and reset old vars from memory, except explicitly returned value. Functions
-// without side-effects (except maybe stdio).
-
 function functiondefinition({ instruction, scope }) {
   const functionScope = new Scope();
   instruction.parameters.forEach(p => {
@@ -195,7 +210,7 @@ function functiondefinition({ instruction, scope }) {
 }
 
 function returnvalue({ instruction, scope }) {
-
+  // TODO
 }
 
 /** Expression generation **/
