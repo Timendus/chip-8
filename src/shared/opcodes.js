@@ -194,8 +194,9 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 01 if a carry occurs
       // Set VF to 00 if a carry does not occur
-      state.v[0xF] = (state.v[x] + state.v[y]) > 0xFF ? 1 : 0;
+      const carry  = (state.v[x] + state.v[y]) > 0xFF ? 1 : 0;
       state.v[x]  += state.v[y];
+      state.v[0xF] = carry;
     }
   },
 
@@ -209,8 +210,9 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 00 if a borrow occurs
       // Set VF to 01 if a borrow does not occur
-      state.v[0xF] = state.v[y] > state.v[x] ? 0 : 1;
+      const borrow = state.v[y] > state.v[x] ? 0 : 1;
       state.v[x]  -= state.v[y];
+      state.v[0xF] = borrow;
     }
   },
 
@@ -218,13 +220,14 @@ module.exports = [
     size:        2,
     bytes:       `8${e.x}${e.y}6`,
     instruction: `shr ${e.reg}$`,
-    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x6],
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (x & 0xF) * 0x10 | 0x6],
     disassemble: ([x, y]) => `shr v${x}, v${y}`,
 
     run: (state, [x, y]) => {
       // Set register VF to the least significant bit prior to the shift
-      state.v[0xF] = state.v[y] & 0b00000001 ? 1 : 0;
+      const carry  = state.v[y] & 0b00000001 ? 1 : 0;
       state.v[x]   = state.v[y] >> 1;
+      state.v[0xF] = carry;
     }
   },
 
@@ -238,8 +241,9 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 00 if a borrow occurs
       // Set VF to 01 if a borrow does not occur
-      state.v[0xF] = state.v[x] > state.v[y] ? 0 : 1;
+      const borrow = state.v[x] > state.v[y] ? 0 : 1;
       state.v[x]   = state.v[y] - state.v[x];
+      state.v[0xF] = borrow;
     }
   },
 
@@ -252,8 +256,9 @@ module.exports = [
 
     run: (state, [x, y]) => {
       // Set register VF to the most significant bit prior to the shift
-      state.v[0xF] = state.v[y] & 0b10000000 ? 1 : 0;
+      const carry  = state.v[y] & 0b10000000 ? 1 : 0;
       state.v[x]   = state.v[y] << 1;
+      state.v[0xF] = carry;
     }
   },
 
