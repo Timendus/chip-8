@@ -25,7 +25,8 @@ module.exports = (
       `endless_loop:`,
       `  jp endless_loop`,
          addendum.assembly,
-      `end_of_program:`
+      `variable_stack:`,
+      `  .db 1`
     ].join('\n');
   } else {
     assembly = [
@@ -108,7 +109,7 @@ function conditional({ instruction, scope }) {
   const label = ++labels;
   return [
        ...expr,
-    `  sne v0, 0`,
+    `  sne v15, 0`,
     `  jp if_${label}`,
        ...block,
     `if_${label}:`
@@ -140,7 +141,7 @@ function whileloop({ instruction, scope }) {
 // Functions in CHIPcode can't use the global scope and don't have side-effects
 // except when they explicitly write to memory.
 
-function functioncall({ instruction, target = 0, scope }) {
+function functioncall({ instruction, target = 15, scope }) {
   let func_name;
   if ( Object.keys(functions).includes(instruction.name) )
     func_name = `func_${instruction.name}`;
@@ -151,8 +152,13 @@ function functioncall({ instruction, target = 0, scope }) {
   // Save current scope
   if ( !functions[instruction.name].safe )
     assembly = assembly.concat([
-      `  ld i, end_of_program`,
-      `  ld (i), v0-v14`
+      `  ld i, variable_stack`,
+      `  ld v0-v0, (i)`,
+      `  ld v${target}, v0`,
+      `  add v0, ${scope.highestRegister() + 1}`,
+      `  ld (i), v0-v0`,
+      `  add i, v${target}`,
+      `  ld (i), v0-v${scope.highestRegister()}`
     ]);
 
   // Create a new scope
@@ -182,13 +188,25 @@ function functioncall({ instruction, target = 0, scope }) {
   assembly.push(`  call ${func_name}`);
 
   // Restore old scope
-  if ( !functions[instruction.name].safe )
+  if ( !functions[instruction.name].safe ) {
+    const temp = scope.declare(`tempvar_${++tempvars}`);
     assembly = assembly.concat([
-      `  ld i, end_of_program`,
-      `  ld v0-v14, (i)`
+      `  ld v${scope.get_register(temp)}, v15`,
+      `  ld i, variable_stack`,
+      `  ld v0-v0, (i)`,
+      `  ld v15, ${scope.highestRegister()}`,
+      `  sub v0, v15`,
+      `  add i, v0`,
+      `  ld v0-v${scope.highestRegister() - 1}, (i)`,
+      `  ld i, variable_stack`,
+      `  ld v0-v0, (i)`,
+      `  ld v15, ${scope.highestRegister()}`,
+      `  sub v0, v15`,
+      `  ld (i), v0-v0`,
+      `  ld v${target}, v${scope.get_register(temp)}`
     ]);
-
-  if ( target != 15 )
+    scope.release(temp);
+  } else if ( target != 15 )
     assembly.push(`  ld v${target}, v15`);
 
   return assembly;
@@ -210,12 +228,15 @@ function functiondefinition({ instruction, scope }) {
 }
 
 function returnvalue({ instruction, scope }) {
-  // TODO
+  return [
+       ...expression({ expr: instruction.expression, target: 15, scope }),
+    `  ret`
+  ];
 }
 
 /** Expression generation **/
 
-function expression({ expr, target = 0, scope }) {
+function expression({ expr, target = 15, scope }) {
   switch(expr.type) {
     case 'integer':
       return [`  ld v${target}, ${expr.value}`];
@@ -228,36 +249,47 @@ function expression({ expr, target = 0, scope }) {
     // Floats / chars / etc in future here?
 
     default:
-      const variable = scope.declare(`tempvar_${++tempvars}`);
-      const left = expression({ expr: expr.left, target: scope.get_register(variable), scope });
-      const right = expression({ expr: expr.right, scope });
+      const leftresult  = scope.declare(`tempvar_${++tempvars}`);
+      const rightresult = scope.declare(`tempvar_${++tempvars}`);
+
+      const left = expression({
+        expr: expr.left,
+        target: scope.get_register(leftresult),
+        scope
+      });
+      const right = expression({
+        expr: expr.right,
+        target: scope.get_register(rightresult),
+        scope
+      });
+
       let assembly = [];
       switch(expr.type) {
         case 'lessthan': // left < right == left - right <= 0
           assembly = [
                ...left,
                ...right,
-            `  sub v${scope.get_register(variable)}, v0`,
+            `  sub v${scope.get_register(leftresult)}, v${scope.get_register(rightresult)}`,
             `  ld v${target}, v15`, // vF
-            `  ld v${scope.get_register(variable)}, 1`,
-            `  xor v${target}, v${scope.get_register(variable)}`
+            `  ld v${scope.get_register(leftresult)}, 1`,
+            `  xor v${target}, v${scope.get_register(leftresult)}`
           ];
           break;
         case 'greaterthan': // left > right == right - left <= 0
           assembly = [
                ...left,
                ...right,
-            `  sub v0, v${scope.get_register(variable)}`,
+            `  sub v${scope.get_register(rightresult)}, v${scope.get_register(leftresult)}`,
             `  ld v${target}, v15`, // vF
-            `  ld v${scope.get_register(variable)}, 1`,
-            `  xor v${target}, v${scope.get_register(variable)}`
+            `  ld v${scope.get_register(leftresult)}, 1`,
+            `  xor v${target}, v${scope.get_register(leftresult)}`
           ];
           break;
         case 'equalto':
           assembly = [
                ...left,
                ...right,
-            `  se v${scope.get_register(variable)}, v0`,
+            `  se v${scope.get_register(leftresult)}, v${scope.get_register(rightresult)}`,
             `  jp equalto_${labels+1}`,
             `  ld v${target}, 1`,
             `  jp equalto_${labels+2}`,
@@ -270,16 +302,16 @@ function expression({ expr, target = 0, scope }) {
           assembly = [
                ...left,
                ...right,
-            `  add v${scope.get_register(variable)}, v0`,
-            `  ld v${target}, v${scope.get_register(variable)}`
+            `  add v${scope.get_register(leftresult)}, v${scope.get_register(rightresult)}`,
+            `  ld v${target}, v${scope.get_register(leftresult)}`
           ];
           break;
         case 'subtraction':
             assembly = [
                  ...left,
                  ...right,
-              `  sub v${scope.get_register(variable)}, v0`,
-              `  ld v${target}, v${scope.get_register(variable)}`
+              `  sub v${scope.get_register(leftresult)}, v${scope.get_register(rightresult)}`,
+              `  ld v${target}, v${scope.get_register(leftresult)}`
             ];
             break;
         case 'multiplication':
@@ -290,14 +322,14 @@ function expression({ expr, target = 0, scope }) {
                ...right,
             `  ld v${scope.get_register(count)}, 0`,
             `  ld v${scope.get_register(result)}, 0`,
-            `  sne v0, 0`,
+            `  sne v${scope.get_register(rightresult)}, 0`,
             `  jp mult_${labels+2}`,
-            `  sne v${scope.get_register(variable)}, 0`,
+            `  sne v${scope.get_register(leftresult)}, 0`,
             `  jp mult_${labels+2}`,
             `mult_${++labels}:`,
-            `  add v${scope.get_register(result)}, v0`,
+            `  add v${scope.get_register(result)}, v${scope.get_register(rightresult)}`,
             `  add v${scope.get_register(count)}, 1`,
-            `  se v${scope.get_register(variable)}, v${scope.get_register(count)}`,
+            `  se v${scope.get_register(leftresult)}, v${scope.get_register(count)}`,
             `  jp mult_${labels}`,
             `mult_${++labels}:`,
             `  ld v${target}, v${scope.get_register(result)}`
@@ -315,7 +347,7 @@ function expression({ expr, target = 0, scope }) {
             `  ld v${scope.get_register(one)}, 1`,
             `div_${++labels}:`,
             `  add v${scope.get_register(counter)}, v${scope.get_register(one)}`,
-            `  sub v${scope.get_register(variable)}, v0`,
+            `  sub v${scope.get_register(leftresult)}, v${scope.get_register(rightresult)}`,
             `  sne v${scope.get_register(one)}, v15`, // vF
             `  jp div_${labels}`,
             `  sub v${scope.get_register(counter)}, v${scope.get_register(one)}`,
@@ -327,7 +359,8 @@ function expression({ expr, target = 0, scope }) {
         default:
           throw `Unhandled expression type: ${expr.type}`;
       }
-      scope.release(variable);
+      scope.release(leftresult);
+      scope.release(rightresult);
       return assembly;
   }
 }

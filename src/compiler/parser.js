@@ -28,18 +28,20 @@ module.exports = peg.generate(`
   controlflow
     = "while" _ "(" _ expression:expression _ ")" _ "{" _ block:(line*) _ "}" { return { type: 'while', expression, block, location: location() }; }
     / "if" _ "(" _ expression:expression _ ")" _ "{" _ block:(line*) _ "}" { return { type: 'if', expression, block, location: location() }; }
-    / functioncall
+    / func:functioncall EOI { return func; }
     / "return" _ expression:expression EOI { return { type: 'return', expression, location: location() }; }
 
   assembly
-    = "raw" ___ instruction:assembly_instruction { return { type: 'assembly', instructions: ['  ' + instruction] }; }
+    = "raw" ___ instruction:assembly_instruction_single_line { return { type: 'assembly', instructions: ['  ' + instruction] }; }
     / "raw <<" EOL? instructions:(assembly_instruction*) _ ">>" { return { type: 'assembly', instructions }; }
 
+  assembly_instruction_single_line
+    = instruction:[a-zA-Z0-9_ \\t\.,\(\)\+;:\-]+ { return instruction.join(''); }
   assembly_instruction
     = instruction:[a-zA-Z0-9_ \\t\.,\(\)\+\\n\\r;:\-]+ { return instruction.join(''); }
 
   functioncall
-    = name:name _ "(" _ parameters:(callparameter*) _ ")" EOI { return { type: 'functioncall', name, parameters, location: location() }; }
+    = name:name _ "(" _ parameters:(callparameter*) _ ")" { return { type: 'functioncall', name, parameters, location: location() }; }
 
   callparameter
     = expression:expression _ ","? _ { return expression; }
@@ -79,8 +81,8 @@ module.exports = peg.generate(`
 
   primary
     = integer
-    / name:name { return { type: 'variable', name, location: location() }; }
     / functioncall
+    / name:name { return { type: 'variable', name, location: location() }; }
     / "(" _ additive:expression _ ")" { return additive; }
     / "!" _ expression:expression { return { type: 'negation', expression }; }
 

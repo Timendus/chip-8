@@ -32,7 +32,7 @@ module.exports = class Scope {
       return str;
 
     return str.replace(
-      new RegExp(Object.keys(this.variables).join('|'), 'gi'),
+      new RegExp(Object.keys(this.variables).map(v => `\\b${v}\\b`).join('|'), 'gi'),
       matched => `v${this.variables[matched]}`
     );
   }
