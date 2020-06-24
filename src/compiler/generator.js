@@ -156,7 +156,9 @@ function functioncall({ instruction, target = 15, scope }) {
       `  ld v0-v0, (i)`,
       `  ld v${target}, v0`,
       `  add v0, ${scope.highestRegister() + 1}`,
+      `  ld i, variable_stack`,
       `  ld (i), v0-v0`,
+      `  ld i, variable_stack`,
       `  add i, v${target}`,
       `  ld (i), v0-v${scope.highestRegister()}`
     ]);
@@ -196,12 +198,14 @@ function functioncall({ instruction, target = 15, scope }) {
       `  ld v0-v0, (i)`,
       `  ld v15, ${scope.highestRegister()}`,
       `  sub v0, v15`,
+      `  ld i, variable_stack`,
       `  add i, v0`,
       `  ld v0-v${scope.highestRegister() - 1}, (i)`,
       `  ld i, variable_stack`,
       `  ld v0-v0, (i)`,
       `  ld v15, ${scope.highestRegister()}`,
       `  sub v0, v15`,
+      `  ld i, variable_stack`,
       `  ld (i), v0-v0`,
       `  ld v${target}, v${scope.get_register(temp)}`
     ]);

@@ -488,10 +488,17 @@ module.exports = [
     disassemble: ([x]) => `ld (i), v${x}`,
 
     run: (state, [x]) => {
-      // I is set to I + X + 1 after operation according to mattmik, left
-      // untouched according to Wikipedia, devernay has no mention of i... :/
+      // I is set to I + X + 1 after operation according to mattmik. wikipedia
+      // says: "In the original CHIP-8 implementation, and also in CHIP-48, I is
+      // left incremented after this instruction had been executed. In SCHIP, I
+      // is left unmodified". Devernay has no mention of I.
+
+      // After working with the Wikipedia definition for a while (keeping I
+      // unchanged), I finally decided to update I anyway, to be compatible with
+      // Octo [http://johnearnest.github.io/Octo/], which seems like a 'de-facto'
+      // standard of today.
       for ( let n = 0; n <= x; n++ )
-        state.ram[state.i + n] = state.v[n];
+        state.ram[state.i++] = state.v[n];
     }
   },
 
@@ -503,10 +510,17 @@ module.exports = [
     disassemble: ([x]) => `ld v${x}, (i)`,
 
     run: (state, [x]) => {
-      // I is set to I + X + 1 after operation according to mattmik, left
-      // untouched according to Wikipedia, devernay has no mention of i... :/
+      // I is set to I + X + 1 after operation according to mattmik. wikipedia
+      // says: "In the original CHIP-8 implementation, and also in CHIP-48, I is
+      // left incremented after this instruction had been executed. In SCHIP, I
+      // is left unmodified". Devernay has no mention of I.
+
+      // After working with the Wikipedia definition for a while (keeping I
+      // unchanged), I finally decided to update I anyway, to be compatible with
+      // Octo [http://johnearnest.github.io/Octo/], which seems like a 'de-facto'
+      // standard of today.
       for ( let n = 0; n <= x; n++ )
-        state.v[n] = state.ram[state.i + n];
+        state.v[n] = state.ram[state.i++];
     }
   }
 
