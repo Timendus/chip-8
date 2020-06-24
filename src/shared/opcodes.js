@@ -219,6 +219,9 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.y}6`,
+    // Some interpreters skip the second register part of these instructions.
+    // To be more compatible, we interpret it the right way, but assemble it the
+    // safe way.
     instruction: `shr ${e.reg}$`,
     assemble:    ([x, y]) => [0x80 | x & 0xF, (x & 0xF) * 0x10 | 0x6],
     disassemble: ([x, y]) => `shr v${x}, v${y}`,
@@ -250,8 +253,11 @@ module.exports = [
   {
     size:        2,
     bytes:       `8${e.x}${e.y}E`,
-    instruction: `shl ${e.reg},${e.reg}$`,
-    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0xE],
+    // Some interpreters skip the second register part of these instructions.
+    // To be more compatible, we interpret it the right way, but assemble it the
+    // safe way.
+    instruction: `shl ${e.reg}$`,
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (x & 0xF) * 0x10 | 0xE],
     disassemble: ([x, y]) => `shl v${x}, v${y}`,
 
     run: (state, [x, y]) => {
