@@ -222,14 +222,18 @@ document.getElementById('upload').addEventListener('change', e => {
   reader.readAsArrayBuffer(e.target.files[0]);
 });
 
+function updatePlayState() {
+  document.getElementById('play').innerText = playing ? 'Pause' : 'Play';
+  document.getElementById('step').disabled = playing;
+}
+
 document.getElementById('play').addEventListener('click', () => {
   playing = !playing;
   if ( playing )
     run();
   else
     stop();
-  document.getElementById('play').innerText = playing ? 'Pause' : 'Play';
-  document.getElementById('step').disabled = playing;
+  updatePlayState();
 });
 
 document.getElementById('step').addEventListener('click', () => {
@@ -238,7 +242,7 @@ document.getElementById('step').addEventListener('click', () => {
 });
 
 document.getElementById('reset').addEventListener('click', () => {
-  startProgram(currentProgram);
+  startProgram(currentProgram, false);
 });
 
 document.getElementById('show_opc').addEventListener('click', () => {
@@ -250,7 +254,7 @@ document.getElementById('show_opc').addEventListener('click', () => {
 
 // Load and run program
 
-function startProgram(program) {
+function startProgram(program, forceStart = true) {
   // Unload old program
   if ( currentState ) {
     stop();
@@ -276,6 +280,11 @@ function startProgram(program) {
   }
 
   console.info(`Starting program...`);
+
+  if ( forceStart ) {
+    playing = true;
+    updatePlayState();
+  }
 
   if ( playing ) run();
 }
