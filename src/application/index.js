@@ -17,43 +17,53 @@ const chipcodeEditor = editor(document.querySelector('#chipcode-editor'), {
   value: `/***
  * This is "CHIPcode", a very simple and very crappy C-style high(er) level
  * programming language for CHIP-8!
- * This particular program calculates all primes between 1 and 50.
+ *
+ * This example program calculates prime numbers, as many as fit on the screen
+ * at once. It mainly shows off CHIPcode's ability to have nested function calls
+ * with parameters and return values, and its ability to do some actual
+ * calculations.
  */
 
 clear_screen();
+print_primes();
 
-byte current = 2;
-byte sum = 0;
-byte xpos = 1;
-byte ypos = 1;
-byte div;
-byte prime;
+function print_primes() {
+  byte current = 2;
+  byte max = 20; // Only this many primes fit on the screen
+  byte xpos = 0;
+  byte ypos = 1;
 
-// Find primes untill we reach 50
-while ( current < 50 ) {
+  while ( max ) {
+    // Output only numbers that are prime numbers
+    if ( isPrime(current) ) {
+      print_byte(current, xpos, ypos);
+      max = max - 1;
 
-  // Is this a prime number?
-  div = 2;
-  prime = 1;
-  while ( div < current ) {
-    // Long form of 'if ( current % div == 0 )', we don't support modulo
-    if ( current - (div * (current/div)) == 0 ) {
-      prime = 0;
+      // Update screen coordinates
+      ypos = ypos + 6;
+      if ( ypos > 30 ) {
+        ypos = 1;
+        xpos = xpos + 15;
+      }
+    }
+
+    current = current + 1;
+  }
+}
+
+function isPrime(byte number) {
+  byte div = 2;
+  while ( div < number ) {
+    if ( mod(number, div) == 0 ) {
+      return 0;
     }
     div = div + 1;
   }
+  return 1;
+}
 
-  // If so, then show it
-  if ( prime ) {
-    print_byte(current, xpos, ypos);
-    ypos = ypos + 6;
-    if ( ypos > 30 ) {
-      ypos = 1;
-      xpos = xpos + 20;
-    }
-  }
-
-  current = current + 1;
+function mod(byte x, byte y) {
+  return x - (y * (x/y));
 }`,
   mode: "javascript",
   lineNumbers: true,
