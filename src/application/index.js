@@ -1,13 +1,13 @@
-const s       = require('../shared/binary_strings');
-const dbgr    = require('../emulator/debugger');
-const state   = require('../emulator/state');
-const font    = require('../emulator/font');
-const timers  = require('../emulator/timers');
-const sound   = require('../emulator/sound');
-const disasm  = require('../disassembler');
-const asm     = require('../assembler');
-const compile = require('../compiler');
-const editor  = require('codemirror');
+const s         = require('../shared/binary_strings');
+const dbgr      = require('../emulator/debugger');
+const state     = require('../emulator/state');
+const font      = require('../emulator/font');
+const timers    = require('../emulator/timers');
+const sound     = require('../emulator/sound');
+const disasm    = require('../disassembler');
+const assembler = require('../assembler');
+const compiler  = require('../compiler');
+const editor    = require('codemirror');
 require('codemirror/mode/z80/z80.js');
 require('codemirror/mode/javascript/javascript.js');
 require('codemirror/addon/display/autorefresh.js');
@@ -131,39 +131,75 @@ document.querySelectorAll('ul.tabs li').forEach(t => {
   });
 });
 
-// Hook up Compile & Run button
+function download(filename, contents, binary = false) {
+  const newname = prompt('File name:', filename);
+  if ( !newname || !contents ) return;
+  const anchor = document.createElement('a');
+  anchor.download = newname;
+  if ( binary ) {
+    anchor.href = 'data:application/octet-stream;base64,' + btoa(String.fromCharCode.apply(null, contents))
+  } else
+    anchor.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents);
+  anchor.click();
+}
 
-document.getElementById('compile').addEventListener('click', e => {
-  const program = chipcodeEditor.doc.getValue();
+// Hook up compiler buttons
+
+function compile(source) {
   const errors  = document.getElementById('chipcode-errors');
   let data;
 
   try {
-    data = compile(program);
+    data = compiler(source);
   } catch(e) {
     errors.innerText = e;
-    return;
+    return null;
   }
 
   errors.innerText = '';
+  return data;
+}
+
+document.getElementById('download-chipcode').addEventListener('click', () =>
+  download('myProgram.chc', chipcodeEditor.doc.getValue()));
+
+document.getElementById('download-compiled').addEventListener('click', () => {
+  const data = compile(chipcodeEditor.doc.getValue());
+  download('myProgram.ch8', data.binary, true);
+});
+
+document.getElementById('compile').addEventListener('click', e => {
+  const data = compile(chipcodeEditor.doc.getValue());
   startProgram(data.binary);
 });
 
-// Hook up Assemble & Run button
+// Hook up assembler buttons
 
-document.getElementById('assemble').addEventListener('click', e => {
-  const program = assemblyEditor.doc.getValue();
+function assemble(source) {
   const errors  = document.getElementById('assembly-errors');
   let data;
 
   try {
-    data = asm(program);
+    data = assembler(source);
   } catch(e) {
     errors.innerText = e;
-    return;
+    return null;
   }
 
   errors.innerText = '';
+  return data;
+}
+
+document.getElementById('download-assembly').addEventListener('click', () =>
+  download('myProgram.asm', assemblyEditor.doc.getValue()));
+
+document.getElementById('download-assembled').addEventListener('click', () => {
+  const data = assemble(assemblyEditor.doc.getValue());
+  download('myProgram.ch8', data, true);
+});
+
+document.getElementById('assemble').addEventListener('click', e => {
+  const data = assemble(assemblyEditor.doc.getValue());
   startProgram(data);
 });
 
