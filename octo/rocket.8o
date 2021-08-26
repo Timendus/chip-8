@@ -1,0 +1,152 @@
+# Rocket program from BYTE Magazine
+# December 1978, volume 3 number 12, page 108 and further
+# https://archive.org/details/byte-magazine-1978-12
+#
+# An Easy Programming System
+# By Joseph Weisbecker
+#
+# Rocket example program annotated and converted to Octo mnemonics by Timendus
+#
+# This is undoubtedly a classic CHIP-8 program because it was described in the
+# very article in which Joseph Weisbecker introduced the CHIP-8 system to the
+# community of micro-computer hobbyists. Because of that it deserved some love,
+# to make it a bit more accessible to an audience that is used to writing
+# assembly software in mnemonics, with aliases and labels and such luxury 😉
+#
+# An interesting thing that puzzled me for a while is why the UFO moves at the
+# same speed regardless of how fast the interpreter runs, even though it's not
+# being synced to the delay timer. I expected that to be a bug, an oversight by
+# the original author because he was targeting this game at a single system
+# anyway. But through some dark magic, the UFO always seems to move at roughly
+# the same speed regardless.
+# The reason for that is that the original RCA VIP interpreter waited for v-sync
+# before executing a sprite draw command, to prevent sprite tearing. The v-sync
+# interrupt ran at 60Hz, just like the delay and sound timers. The better modern
+# interpreters emulate this behaviour by halting untill the 60Hz interrupt fires
+# before drawing sprites to the screen. This limits execution speed, and keeps
+# the game running at a steady pace. Try running it in SCHIP mode and you will
+# see the UFO zipping by at unplayable speeds as expected 🛸
+
+:alias score       v1
+:alias rocketCount v2
+:alias scoreX      v3
+:alias scoreY      v4
+:alias ufoX        v5
+:alias ufoY        v6
+:alias rocketX     v7
+:alias rocketY     v8
+:alias rocketFired v9
+:alias roundScore  vA
+
+: main
+  # "Initialize variables"
+  score := 0
+  rocketCount := 0
+  scoreX := 0x38
+  scoreY := 0x1B
+  ufoX := 0
+  ufoY := 08
+
+  # "Display UFO pattern"
+  i := ufo
+  sprite ufoX ufoY 3
+
+: game-loop
+  # "Display score"
+  render-score
+
+  # Halt game after nine rockets
+  if rocketCount == 9 then
+: done
+	jump done
+
+  # Reset for next rocket
+  # "Increment rocket count"
+  rocketCount += 1
+  rocketY := 0x1A           # At bottom of the screen
+  roundScore := 0           # No point scored so far
+  rocketX := random 0x1F    # At semi-random X position
+  rocketX += 0x0F
+  rocketFired := 0
+
+  # "Display rocket"
+  i := rocket
+  sprite rocketX rocketY 6
+
+: inner-loop
+  # "Move UFO Random(0,3) spot positions"
+  i := ufo
+  sprite ufoX ufoY 3
+  v0 := random 0x03
+  ufoX += v0
+  sprite ufoX ufoY 3
+  # "Did rocket hit UFO?"
+  if vF != 0 then jump collision
+
+  # "Is F key depressed?"
+  v0 := 0x0F
+  if v0 key then rocketFired := 1
+  if rocketFired != 1 then jump inner-loop
+
+  # Wait for delay timer to run out
+  v0 := delay
+  if v0 != 00 then jump inner-loop
+
+  # "Move rocket up one spot position"
+  i := rocket
+  sprite rocketX rocketY 6
+  rocketY += 0xFF          # In other words: rocketY -= 1 because of overflow
+  sprite rocketX rocketY 6
+  # "Did rocket hit UFO?"
+  if vF != 0 then jump collision
+
+  # Add some delay so the rocket flies ~3 times as slow as the UFO
+  # (see also note on timing at the top of this file)
+  v0 := 3
+  delay := v0
+
+  # "Is rocket at top of screen?"
+  if rocketY != 0 then jump inner-loop
+
+: top-reached
+  # "Erase score, erase rocket"
+  render-score
+  i := rocket
+  sprite rocketX rocketY 6
+
+  # "Add score increment to score"
+  score += roundScore
+
+  jump game-loop
+
+: collision
+  # Increase score
+  roundScore := 1
+
+  # Beep!
+  v0 := 3
+  buzzer := v0
+
+  jump top-reached
+
+: render-score
+  i := 0x02A0
+  bcd score
+  i := 0x02A2
+  load v0
+  i := hex v0
+  sprite scoreX scoreY 5
+  return
+
+: rocket
+  0b00100000 # 0x20
+  0b01110000 # 0x70
+  0b01110000 # 0x70
+  0b11111000 # 0xF8
+  0b11011000 # 0xD8
+  0b10001000 # 0x88
+
+: ufo
+  0b01111100 # 0x7C
+  0b11010110 # 0xD6
+  0b01111100 # 0x7C
