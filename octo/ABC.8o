@@ -3,7 +3,7 @@
 #
 # Uses only these five instructions:
 #  * Clear the screen
-#  * Load regisiter with immediate value
+#  * Load register with immediate value
 #  * Get font pointer in i
 #  * Draw sprite to screen
 #  * Jump (to loop at the end, so kinda optional)
