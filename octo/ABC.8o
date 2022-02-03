@@ -1,0 +1,30 @@
+# Font debugging ROM by Timendus
+# 30 bytes, 14 cycles to draw "ABC" to the screen
+#
+# Uses only these five instructions:
+#  * Clear the screen
+#  * Load regisiter with immediate value
+#  * Get font pointer in i
+#  * Draw sprite to screen
+#  * Jump (to loop at the end, so kinda optional)
+
+: main
+	clear
+	v2 := 12
+
+	v1 := 25
+	v0 := 0xA
+	i := hex v0
+	sprite v1 v2 5
+	
+	v1 := 30
+	v0 := 0xB
+	i := hex v0
+	sprite v1 v2 5
+	
+	v1 := 35
+	v0 := 0xC
+	i := hex v0
+	sprite v1 v2 5
+
+	loop again
