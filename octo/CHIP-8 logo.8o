@@ -1,3 +1,17 @@
+# CHIP-8 logo ROM by Timendus
+# 132 bytes, 20 cycles to show "CHIP-8" on the screen
+#
+# This ROM is simpler than the IBM logo in two ways:
+#  a) It does not use the addition instruction
+#  b) It only renders aligned sprites (all coordinates are multiples of 8)
+#
+# Uses only these five instructions:
+#  * Clear the screen
+#  * Load normal register with immediate value
+#  * Load i register with immediate value
+#  * Draw sprite to screen (only aligned)
+#  * Jump (to loop at the end, so kinda optional)
+
 :macro show X address {
   v0 := X
   i := address
