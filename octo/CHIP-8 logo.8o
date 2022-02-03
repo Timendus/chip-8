@@ -6,7 +6,7 @@
 
 : main
   clear
-	v1 := 8
+  v1 := 8
   show  8 logo-part1
   show 16 logo-part2
   show 24 logo-part3
