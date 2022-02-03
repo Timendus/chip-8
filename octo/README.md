@@ -6,4 +6,5 @@ IDE and interpreter in one, just like my own pet project in this repository, but
 a lot more advanced.
 
 The code in this directory is here in the hope it will be inspiring or useful to
-someone. It is licensed under the GPLv3, just like the rest of the repository.
+someone. It is licensed under the GPLv3, just like the rest of the repository,
+unless stated otherwise.
