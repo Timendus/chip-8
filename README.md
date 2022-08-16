@@ -1,3 +1,15 @@
+### Warning
+
+**This project has been discontinued and is only still online for posterity. It
+is in no way a good example, or even a valid reference, of a CHIP-8 interpreter!**
+
+* If you're looking for a nice web based CHIP-8 interpreter, check out my project
+  [Silicon8](https://github.com/Timendus/silicon8).
+* If you're looking for a good web based CHIP-8 IDE slash assembler, check out
+  [Octo](http://johnearnest.github.io/Octo/).
+* If you're working on your own CHIP-8 interpreter, you may appreciate my
+  [CHIP-8 test suite](https://github.com/Timendus/chip8-test-suite).
+
 # CHIP-8 fun
 
 Just a fun project that began when I had a free Saturday and wrote much of the
