@@ -9,7 +9,7 @@ loop:
   ld i, string      ; Find character in string
   add i, v3
 
-  ld v0, (i)        ; Load character
+  ld v0-v0, (i)     ; Load character
   sne v0, 0         ; If zero, we're done
   jp endlessLoop
 
@@ -22,11 +22,9 @@ loop:
 
 print:
   call asciiToFont  ; Find font pointer from ascii value
-  ld v0,(i)         ; Find character width
+  ld v0-v0,(i)      ; Find character width
 
-  ld v4, 1          ; Draw character to screen
-  add i, v4
-  drw v1, v2, 5
+  drw v1, v2, 5     ; Draw character to screen
 
   add v1, v0        ; X coord = X + character width
   add v3, 1         ; Next character

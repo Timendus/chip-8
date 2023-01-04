@@ -1,0 +1,48 @@
+/***
+ * This example program calculates prime numbers, as many as fit on the screen
+ * at once. It mainly shows off CHIPcode's ability to have nested function calls
+ * with parameters and return values, and its ability to do some actual
+ * calculations.
+ */
+
+clear_screen();
+print_primes();
+
+function print_primes() {
+  byte current = 2;
+  byte max = 20; // Only this many primes fit on the screen
+  byte xpos = 0;
+  byte ypos = 1;
+
+  while ( max ) {
+    // Output only numbers that are prime numbers
+    if ( isPrime(current) ) {
+      print_byte(current, xpos, ypos);
+      max = max - 1;
+
+      // Update screen coordinates
+      ypos = ypos + 6;
+      if ( ypos > 30 ) {
+        ypos = 1;
+        xpos = xpos + 15;
+      }
+    }
+
+    current = current + 1;
+  }
+}
+
+function isPrime(byte number) {
+  byte div = 2;
+  while ( div < number ) {
+    if ( mod(number, div) == 0 ) {
+      return 0;
+    }
+    div = div + 1;
+  }
+  return 1;
+}
+
+function mod(byte x, byte y) {
+  return x - (y * (x/y));
+}

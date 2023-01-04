@@ -1,0 +1,28 @@
+/***
+ * The first test file written in "CHIPcode", a very simple and very crappy
+ * C-style high(er) level programming language for CHIP-8!
+ */
+
+clear_screen();
+
+// We can initialize variables directly or with expressions:
+byte sticks = 50;          // >> 50
+byte stones = sticks - 12; // >> 38
+
+// We can output variables as decimal numbers:
+print_byte(sticks, 1, 1);  // >> 50
+print_byte(stones, 1, 7);  // >> 38
+
+// We can make function calls with expressions:
+print_byte(sticks + stones, 30, 1); // >> 88
+print_byte(sticks / 12, 30, 7);     // >> 4,16666, but we get only the 4
+
+// This is very inefficient to do, because all calculations will be done in
+// assembly, not by a pre-processor. But just to show that we understand order
+// of operations:
+print_byte((3 + 5) * 15, 1, 20); // >> 120
+print_byte(3 + 5 * 15, 1, 26);   // >> 78
+
+// Note that variables of type byte are just 8 bits, and will overflow:
+print_byte(sticks * stones, 30, 20); // >> 1900 % 256 = 108
+print_byte(255 + 3, 30, 26);         // >> 258 % 256 = 2

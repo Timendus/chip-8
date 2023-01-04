@@ -194,8 +194,9 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 01 if a carry occurs
       // Set VF to 00 if a carry does not occur
-      state.v[0xF] = (state.v[x] + state.v[y]) > 0xFF ? 1 : 0;
+      const carry  = (state.v[x] + state.v[y]) > 0xFF ? 1 : 0;
       state.v[x]  += state.v[y];
+      state.v[0xF] = carry;
     }
   },
 
@@ -209,22 +210,27 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 00 if a borrow occurs
       // Set VF to 01 if a borrow does not occur
-      state.v[0xF] = state.v[y] > state.v[x] ? 0 : 1;
+      const borrow = state.v[y] > state.v[x] ? 0 : 1;
       state.v[x]  -= state.v[y];
+      state.v[0xF] = borrow;
     }
   },
 
   {
     size:        2,
     bytes:       `8${e.x}${e.y}6`,
+    // Some interpreters skip the second register part of these instructions.
+    // To be more compatible, we interpret it the right way, but assemble it the
+    // safe way.
     instruction: `shr ${e.reg}$`,
-    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0x6],
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (x & 0xF) * 0x10 | 0x6],
     disassemble: ([x, y]) => `shr v${x}, v${y}`,
 
     run: (state, [x, y]) => {
       // Set register VF to the least significant bit prior to the shift
-      state.v[0xF] = state.v[y] & 0b00000001 ? 1 : 0;
+      const carry  = state.v[y] & 0b00000001 ? 1 : 0;
       state.v[x]   = state.v[y] >> 1;
+      state.v[0xF] = carry;
     }
   },
 
@@ -238,22 +244,27 @@ module.exports = [
     run: (state, [x, y]) => {
       // Set VF to 00 if a borrow occurs
       // Set VF to 01 if a borrow does not occur
-      state.v[0xF] = state.v[x] > state.v[y] ? 0 : 1;
+      const borrow = state.v[x] > state.v[y] ? 0 : 1;
       state.v[x]   = state.v[y] - state.v[x];
+      state.v[0xF] = borrow;
     }
   },
 
   {
     size:        2,
     bytes:       `8${e.x}${e.y}E`,
-    instruction: `shl ${e.reg},${e.reg}$`,
-    assemble:    ([x, y]) => [0x80 | x & 0xF, (y & 0xF) * 0x10 | 0xE],
+    // Some interpreters skip the second register part of these instructions.
+    // To be more compatible, we interpret it the right way, but assemble it the
+    // safe way.
+    instruction: `shl ${e.reg}$`,
+    assemble:    ([x, y]) => [0x80 | x & 0xF, (x & 0xF) * 0x10 | 0xE],
     disassemble: ([x, y]) => `shl v${x}, v${y}`,
 
     run: (state, [x, y]) => {
       // Set register VF to the most significant bit prior to the shift
-      state.v[0xF] = state.v[y] & 0b10000000 ? 1 : 0;
+      const carry  = state.v[y] & 0b10000000 ? 1 : 0;
       state.v[x]   = state.v[y] << 1;
+      state.v[0xF] = carry;
     }
   },
 
@@ -477,10 +488,17 @@ module.exports = [
     disassemble: ([x]) => `ld (i), v${x}`,
 
     run: (state, [x]) => {
-      // I is set to I + X + 1 after operation according to mattmik, left
-      // untouched according to Wikipedia, devernay has no mention of i... :/
+      // I is set to I + X + 1 after operation according to mattmik. wikipedia
+      // says: "In the original CHIP-8 implementation, and also in CHIP-48, I is
+      // left incremented after this instruction had been executed. In SCHIP, I
+      // is left unmodified". Devernay has no mention of I.
+
+      // After working with the Wikipedia definition for a while (keeping I
+      // unchanged), I finally decided to update I anyway, to be compatible with
+      // Octo [http://johnearnest.github.io/Octo/], which seems like a 'de-facto'
+      // standard of today.
       for ( let n = 0; n <= x; n++ )
-        state.ram[state.i + n] = state.v[n];
+        state.ram[state.i++] = state.v[n];
     }
   },
 
@@ -492,10 +510,17 @@ module.exports = [
     disassemble: ([x]) => `ld v${x}, (i)`,
 
     run: (state, [x]) => {
-      // I is set to I + X + 1 after operation according to mattmik, left
-      // untouched according to Wikipedia, devernay has no mention of i... :/
+      // I is set to I + X + 1 after operation according to mattmik. wikipedia
+      // says: "In the original CHIP-8 implementation, and also in CHIP-48, I is
+      // left incremented after this instruction had been executed. In SCHIP, I
+      // is left unmodified". Devernay has no mention of I.
+
+      // After working with the Wikipedia definition for a while (keeping I
+      // unchanged), I finally decided to update I anyway, to be compatible with
+      // Octo [http://johnearnest.github.io/Octo/], which seems like a 'de-facto'
+      // standard of today.
       for ( let n = 0; n <= x; n++ )
-        state.v[n] = state.ram[state.i + n];
+        state.v[n] = state.ram[state.i++];
     }
   }
 

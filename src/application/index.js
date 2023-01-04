@@ -1,18 +1,83 @@
-const s      = require('../shared/binary_strings');
-const dbgr   = require('../emulator/debugger');
-const state  = require('../emulator/state');
-const font   = require('../emulator/font');
-const timers = require('../emulator/timers');
-const sound  = require('../emulator/sound');
-const disasm = require('../disassembler');
-const asm    = require('../assembler');
-const editor = require('codemirror');
+const s         = require('../shared/binary_strings');
+const dbgr      = require('../emulator/debugger');
+const state     = require('../emulator/state');
+const font      = require('../emulator/font');
+const timers    = require('../emulator/timers');
+const sound     = require('../emulator/sound');
+const disasm    = require('../disassembler');
+const assembler = require('../assembler');
+const compiler  = require('../compiler');
+const editor    = require('codemirror');
 require('codemirror/mode/z80/z80.js');
+require('codemirror/mode/javascript/javascript.js');
 require('codemirror/addon/display/autorefresh.js');
 
-// Initialize code editor
-const codeEditor = editor(document.querySelector('#editor'), {
-  value: `.org $200
+// Initialize CHIPcode editor
+const chipcodeEditor = editor(document.querySelector('#chipcode-editor'), {
+  value: `/***
+ * This is "CHIPcode", a very simple and very crappy C-style high(er) level
+ * programming language for CHIP-8!
+ *
+ * This example program calculates prime numbers, as many as fit on the screen
+ * at once. It mainly shows off CHIPcode's ability to have nested function calls
+ * with parameters and return values, and its ability to do some actual
+ * calculations.
+ */
+
+clear_screen();
+print_primes();
+
+function print_primes() {
+  byte current = 2;
+  byte max = 20; // Only this many primes fit on the screen
+  byte xpos = 0;
+  byte ypos = 1;
+
+  while ( max ) {
+    // Output only numbers that are prime numbers
+    if ( isPrime(current) ) {
+      print_byte(current, xpos, ypos);
+      max = max - 1;
+
+      // Update screen coordinates
+      ypos = ypos + 6;
+      if ( ypos > 30 ) {
+        ypos = 1;
+        xpos = xpos + 15;
+      }
+    }
+
+    current = current + 1;
+  }
+}
+
+function isPrime(byte number) {
+  byte div = 2;
+  while ( div < number ) {
+    if ( mod(number, div) == 0 ) {
+      return 0;
+    }
+    div = div + 1;
+  }
+  return 1;
+}
+
+function mod(byte x, byte y) {
+  return x - (y * (x/y));
+}`,
+  mode: "javascript",
+  lineNumbers: true,
+  theme: 'monokai',
+  tabSize: 2,
+  autoRefresh: true
+});
+
+// Initialize assembly editor
+const assemblyEditor = editor(document.querySelector('#assembly-editor'), {
+  value: `; This is my (z80-based) CHIP-8 assembly dialect.
+; This particular program outputs "ABC" on the screen.
+
+  .org $200
 
   ; Setup
   cls
@@ -76,21 +141,75 @@ document.querySelectorAll('ul.tabs li').forEach(t => {
   });
 });
 
-// Hook up Assemble & Run button
+function download(filename, contents, binary = false) {
+  const newname = prompt('File name:', filename);
+  if ( !newname || !contents ) return;
+  const anchor = document.createElement('a');
+  anchor.download = newname;
+  if ( binary ) {
+    anchor.href = 'data:application/octet-stream;base64,' + btoa(String.fromCharCode.apply(null, contents))
+  } else
+    anchor.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents);
+  anchor.click();
+}
 
-document.getElementById('run').addEventListener('click', e => {
-  const program = codeEditor.doc.getValue();
-  const errors  = document.getElementById('errors');
+// Hook up compiler buttons
+
+function compile(source) {
+  const errors  = document.getElementById('chipcode-errors');
   let data;
 
   try {
-    data = asm(program);
+    data = compiler(source);
   } catch(e) {
     errors.innerText = e;
-    return;
+    return null;
   }
 
   errors.innerText = '';
+  return data;
+}
+
+document.getElementById('download-chipcode').addEventListener('click', () =>
+  download('myProgram.chc', chipcodeEditor.doc.getValue()));
+
+document.getElementById('download-compiled').addEventListener('click', () => {
+  const data = compile(chipcodeEditor.doc.getValue());
+  download('myProgram.ch8', data.binary, true);
+});
+
+document.getElementById('compile').addEventListener('click', e => {
+  const data = compile(chipcodeEditor.doc.getValue());
+  startProgram(data.binary);
+});
+
+// Hook up assembler buttons
+
+function assemble(source) {
+  const errors  = document.getElementById('assembly-errors');
+  let data;
+
+  try {
+    data = assembler(source);
+  } catch(e) {
+    errors.innerText = e;
+    return null;
+  }
+
+  errors.innerText = '';
+  return data;
+}
+
+document.getElementById('download-assembly').addEventListener('click', () =>
+  download('myProgram.asm', assemblyEditor.doc.getValue()));
+
+document.getElementById('download-assembled').addEventListener('click', () => {
+  const data = assemble(assemblyEditor.doc.getValue());
+  download('myProgram.ch8', data, true);
+});
+
+document.getElementById('assemble').addEventListener('click', e => {
+  const data = assemble(assemblyEditor.doc.getValue());
   startProgram(data);
 });
 
@@ -103,14 +222,18 @@ document.getElementById('upload').addEventListener('change', e => {
   reader.readAsArrayBuffer(e.target.files[0]);
 });
 
+function updatePlayState() {
+  document.getElementById('play').innerText = playing ? 'Pause' : 'Play';
+  document.getElementById('step').disabled = playing;
+}
+
 document.getElementById('play').addEventListener('click', () => {
   playing = !playing;
   if ( playing )
     run();
   else
     stop();
-  document.getElementById('play').innerText = playing ? 'Pause' : 'Play';
-  document.getElementById('step').disabled = playing;
+  updatePlayState();
 });
 
 document.getElementById('step').addEventListener('click', () => {
@@ -119,7 +242,7 @@ document.getElementById('step').addEventListener('click', () => {
 });
 
 document.getElementById('reset').addEventListener('click', () => {
-  startProgram(currentProgram);
+  startProgram(currentProgram, false);
 });
 
 document.getElementById('show_opc').addEventListener('click', () => {
@@ -131,7 +254,7 @@ document.getElementById('show_opc').addEventListener('click', () => {
 
 // Load and run program
 
-function startProgram(program) {
+function startProgram(program, forceStart = true) {
   // Unload old program
   if ( currentState ) {
     stop();
@@ -157,6 +280,11 @@ function startProgram(program) {
   }
 
   console.info(`Starting program...`);
+
+  if ( forceStart ) {
+    playing = true;
+    updatePlayState();
+  }
 
   if ( playing ) run();
 }

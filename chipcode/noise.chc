@@ -1,0 +1,34 @@
+/***
+ * This example program shows random noise on the screen. It shows CHIPcode's
+ * ability to use conditional jumps to create while loops and if statements.
+ * Also, it shows some inline assembler.
+ */
+
+clear_screen();
+byte xpos = 0;
+byte ypos = 0;
+
+while ( ypos < 32 ) {
+  while ( xpos < 64 ) {
+    raw <<
+      ld i, buffer
+      rand v0, $FF
+      ld (i), v0-v0
+      ld i, buffer
+      drw xpos, ypos, 1
+    >>
+
+    xpos = xpos + 8;
+  }
+  xpos = 0;
+  ypos = ypos + 1;
+}
+
+// We need to have a buffer,
+// but we don't want it to get executed as code
+if (0) {
+  raw <<
+buffer:
+  .db 0
+  >>
+}
